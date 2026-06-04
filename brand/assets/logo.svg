@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 120" role="img" aria-label="The Super 7">
+  <defs>
+    <linearGradient id="s7y" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E8ED5A"/>
+      <stop offset="1" stop-color="#C2C72E"/>
+    </linearGradient>
+  </defs>
+  <!-- 3D depth shadow -->
+  <g transform="translate(7,9)" opacity="0.55">
+    <path d="M20,20 L100,20 L100,36 L60,108 L36,108 L72,36 L20,36 Z" fill="#3A3B3D"/>
+    <path d="M50,20 L120,20 L120,36 L96,80 L74,80 L102,36 L50,36 Z" fill="#3A3B3D"/>
+  </g>
+  <!-- silver bevel layer -->
+  <g transform="translate(3,4)">
+    <path d="M20,20 L100,20 L100,36 L60,108 L36,108 L72,36 L20,36 Z" fill="#C7C8CA"/>
+    <path d="M50,20 L120,20 L120,36 L96,80 L74,80 L102,36 L50,36 Z" fill="#C7C8CA"/>
+  </g>
+  <!-- main interlocking 7s -->
+  <path d="M20,20 L100,20 L100,36 L60,108 L36,108 L72,36 L20,36 Z" fill="url(#s7y)" stroke="#9DA226" stroke-width="1.5"/>
+  <path d="M50,20 L120,20 L120,36 L96,80 L74,80 L102,36 L50,36 Z" fill="url(#s7y)" stroke="#9DA226" stroke-width="1.5"/>
+</svg>

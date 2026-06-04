@@ -1,0 +1,38 @@
+/* The Super 7 — Design Tokens
+   Drop this into any page and use the CSS variables below. */
+
+:root {
+  /* Core palette */
+  --s7-yellow:        #DCE140; /* primary / hero */
+  --s7-yellow-hover:  #E8ED5A;
+  --s7-yellow-deep:   #B7BC2E;
+
+  --s7-charcoal:      #595B5D; /* base surface */
+  --s7-slate:         #6E7072;
+  --s7-graphite:      #3A3B3D;
+  --s7-ink:           #1A1B1D; /* deep surface / text */
+
+  --s7-silver:        #C7C8CA; /* metallic accent */
+  --s7-offwhite:      #F4F4F2;
+  --s7-white:         #FFFFFF;
+
+  /* States */
+  --s7-success:       #3FB95B;
+  --s7-error:         #E23B3B;
+
+  /* Semantic */
+  --s7-bg:            var(--s7-ink);
+  --s7-bg-alt:        var(--s7-charcoal);
+  --s7-text:          var(--s7-offwhite);
+  --s7-text-muted:    var(--s7-silver);
+  --s7-accent:        var(--s7-yellow);
+  --s7-border:        rgba(199, 200, 202, 0.18);
+
+  /* Typography */
+  --s7-font-display:  "Anton", "Archivo", system-ui, sans-serif;
+  --s7-font-body:     "Inter", "Roboto", system-ui, sans-serif;
+
+  /* Radius & shadow */
+  --s7-radius:        10px;
+  --s7-shadow:        0 8px 30px rgba(0, 0, 0, 0.35);
+}

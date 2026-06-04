@@ -1,0 +1,9 @@
+# OS / editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+
+# Dependencies (none currently, but future-proofing)
+node_modules/
+vendor/
