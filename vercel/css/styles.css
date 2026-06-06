@@ -306,8 +306,17 @@ img { max-width: 100%; display: block; }
 @keyframes s7-glow   { 0%,100% { box-shadow: 0 0 40px rgba(220,225,64,.15); } 50% { box-shadow: 0 0 72px rgba(220,225,64,.4); } }
 @keyframes s7-pop    { from { opacity: 0; transform: translateY(16px) scale(.96); } to { opacity: 1; transform: none; } }
 
-/* Layered depth on the page background */
-body { background: radial-gradient(1100px 560px at 50% -260px, rgba(220,225,64,.06), transparent 60%), var(--s7-ink); }
+/* Cohesive fixed page backdrop: soft colour glows + faint dot texture */
+body {
+  background:
+    radial-gradient(1100px 640px at 50% -280px, rgba(220,225,64,.12), transparent 58%) no-repeat,
+    radial-gradient(820px 640px at 92% 6%, rgba(108,171,221,.08), transparent 55%) no-repeat,
+    radial-gradient(760px 680px at 4% 82%, rgba(220,225,64,.05), transparent 55%) no-repeat,
+    radial-gradient(rgba(255,255,255,.028) 1px, transparent 1.5px) 0 0 / 26px 26px repeat,
+    linear-gradient(180deg, #1b1c1e, #131416 55%, #1b1c1e) no-repeat;
+  background-attachment: fixed;
+  background-color: #141517;
+}
 
 /* Animated hero background: drifting lines + two floating colour glows */
 .hero-bg::after { animation: s7-drift 26s linear infinite; }
@@ -372,3 +381,38 @@ body { background: radial-gradient(1100px 560px at 50% -260px, rgba(220,225,64,.
 /* Shield grid responsive (kept after base so it wins on small screens) */
 @media (max-width: 860px) { .club-row { grid-template-columns: repeat(4, 1fr); max-width: 520px; } }
 @media (max-width: 560px) { .club-row { grid-template-columns: repeat(3, 1fr); } }
+
+/* ============================================================
+   Surface & background polish
+   ============================================================ */
+
+/* Hero: drop the noisy lines, keep a soft top glow that fades into the page */
+.hero-bg { background: radial-gradient(820px 440px at 50% -40px, rgba(220,225,64,.14), transparent 60%); }
+.hero-bg::after { background: linear-gradient(180deg, transparent 58%, #141517 100%); animation: none; }
+
+/* "Coming soon" reads as a pill badge */
+.eyebrow {
+  display: inline-block; background: rgba(220,225,64,.12);
+  border: 1px solid rgba(220,225,64,.4); padding: .35rem .95rem; border-radius: 999px;
+}
+
+/* Header lift */
+.site-header { background: rgba(18,19,21,.82); box-shadow: 0 6px 24px rgba(0,0,0,.3); }
+
+/* Sections and cards become translucent "glass" over the backdrop */
+.section-alt {
+  background: rgba(255,255,255,.04);
+  border-top: 1px solid var(--s7-border); border-bottom: 1px solid var(--s7-border);
+}
+.step, .prize, .faq-item, .slip {
+  background: rgba(255,255,255,.045);
+  border-color: rgba(255,255,255,.09);
+  -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px);
+}
+.section-alt .step, .section-alt .slip { background: rgba(255,255,255,.06); }
+.prize-feature { background: linear-gradient(160deg, rgba(220,225,64,.18), rgba(220,225,64,.03)); border-color: var(--s7-yellow); }
+.table-wrap { background: rgba(255,255,255,.03); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); }
+.leaderboard thead th { background: rgba(255,255,255,.05); }
+
+/* CTA strip: subtle gradient instead of a flat fill */
+.cta-strip { background: linear-gradient(135deg, var(--s7-yellow), var(--s7-yellow-hover)); }
