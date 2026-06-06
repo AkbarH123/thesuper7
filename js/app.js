@@ -100,6 +100,24 @@
       `<path d="${SHIELD_PATH}" fill="${c.bg}" stroke="${c.border}" stroke-width="5" stroke-linejoin="round"/></svg>`;
   }
 
+  // Striped shield (Newcastle) as a self-contained SVG <img> so the clip/stripes
+  // render reliably (injected inline SVG clip refs are unreliable across browsers).
+  function stripedShieldImg(c) {
+    const svg =
+      "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 112'>" +
+      "<clipPath id='c'><path d='" + SHIELD_PATH + "'/></clipPath>" +
+      "<g clip-path='url(#c)'>" +
+      "<rect x='0' y='0' width='100' height='112' fill='#ffffff'/>" +
+      "<rect x='0' y='0' width='12.5' height='112' fill='#000000'/>" +
+      "<rect x='25' y='0' width='12.5' height='112' fill='#000000'/>" +
+      "<rect x='50' y='0' width='12.5' height='112' fill='#000000'/>" +
+      "<rect x='75' y='0' width='12.5' height='112' fill='#000000'/>" +
+      "</g>" +
+      "<path d='" + SHIELD_PATH + "' fill='none' stroke='" + c.border + "' stroke-width='5' stroke-linejoin='round'/>" +
+      "</svg>";
+    return `<img class="shield-svg" alt="" src="data:image/svg+xml,${encodeURIComponent(svg)}">`;
+  }
+
   function renderClubRow() {
     const row = $("#clubRow");
     if (!row) return;
@@ -107,9 +125,7 @@
       const nameStyle = c.stripe
         ? `background:#fff;color:#000;padding:3px 8px;border-radius:4px;border:1px solid ${c.border}`
         : `color:${c.text}`;
-      const body = c.stripe
-        ? `<div class="shield-striped" style="background:${c.border}"><span class="shield-stripes"></span></div>`
-        : shieldSVG(c);
+      const body = c.stripe ? stripedShieldImg(c) : shieldSVG(c);
       return `<div class="shield" title="${c.name}">${body}` +
         `<span class="shield-name" style="${nameStyle}">${c.name}</span></div>`;
     }).join("");
