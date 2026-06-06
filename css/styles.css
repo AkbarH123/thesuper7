@@ -74,9 +74,10 @@ img { max-width: 100%; display: block; }
 .hero-title .hl { color: var(--s7-yellow); }
 .hero-sub { max-width: 620px; margin: 1.2rem auto 0; color: var(--s7-text-muted); font-size: 1.15rem; }
 
-.club-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)); gap: 14px; max-width: 940px; margin: 2.2rem auto; }
+.club-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; max-width: 900px; margin: 2.2rem auto; }
 /* Heraldic shield rendered as an inline SVG, with the name overlaid. */
-.shield { position: relative; filter: drop-shadow(0 6px 14px rgba(0,0,0,.4)); }
+.shield { position: relative; filter: drop-shadow(0 6px 14px rgba(0,0,0,.4)); transition: transform .25s ease, filter .25s ease; }
+.shield:hover { transform: translateY(-6px) scale(1.05); filter: drop-shadow(0 14px 24px rgba(0,0,0,.55)); }
 .shield-svg { width: 100%; height: auto; display: block; }
 .shield-name {
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
@@ -287,3 +288,80 @@ img { max-width: 100%; display: block; }
   .cta-inner { flex-direction: column; text-align: center; }
   .section { padding: 3rem 0; }
 }
+
+/* ============================================================
+   Polish & motion
+   ============================================================ */
+
+@keyframes s7-drift  { from { background-position: 0 0; } to { background-position: 60px 60px; } }
+@keyframes s7-floatA { 0%,100% { transform: translate(0,0); } 50% { transform: translate(40px, 30px); } }
+@keyframes s7-floatB { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-46px, 22px); } }
+@keyframes s7-glow   { 0%,100% { box-shadow: 0 0 40px rgba(220,225,64,.15); } 50% { box-shadow: 0 0 72px rgba(220,225,64,.4); } }
+@keyframes s7-pop    { from { opacity: 0; transform: translateY(16px) scale(.96); } to { opacity: 1; transform: none; } }
+
+/* Layered depth on the page background */
+body { background: radial-gradient(1100px 560px at 50% -260px, rgba(220,225,64,.06), transparent 60%), var(--s7-ink); }
+
+/* Animated hero background: drifting lines + two floating colour glows */
+.hero-bg::after { animation: s7-drift 26s linear infinite; }
+.hero-bg::before {
+  content: ""; position: absolute; pointer-events: none; z-index: 0;
+  width: 480px; height: 480px; top: -130px; right: -70px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(220,225,64,.22), transparent 65%);
+  filter: blur(8px); animation: s7-floatA 15s ease-in-out infinite;
+}
+.hero::before {
+  content: ""; position: absolute; pointer-events: none; z-index: 0;
+  width: 440px; height: 440px; bottom: -160px; left: -90px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(108,171,221,.16), transparent 65%);
+  filter: blur(8px); animation: s7-floatB 19s ease-in-out infinite;
+}
+
+/* Headline gets a subtle glow */
+.hero-title { text-shadow: 0 0 34px rgba(220,225,64,.28); }
+
+/* Shields fade/pop in, staggered */
+.shield { animation: s7-pop .55s ease both; }
+.shield:nth-child(1) { animation-delay: .04s; }
+.shield:nth-child(2) { animation-delay: .10s; }
+.shield:nth-child(3) { animation-delay: .16s; }
+.shield:nth-child(4) { animation-delay: .22s; }
+.shield:nth-child(5) { animation-delay: .28s; }
+.shield:nth-child(6) { animation-delay: .34s; }
+.shield:nth-child(7) { animation-delay: .40s; }
+
+/* Jackpot pulses softly */
+.jackpot { animation: s7-glow 3.6s ease-in-out infinite; }
+
+/* Richer section + card treatment */
+.section-alt { background: linear-gradient(180deg, var(--s7-charcoal) 0%, #4e5052 100%); }
+.step, .prize { transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease, background .2s ease; }
+.step:hover, .prize:hover { transform: translateY(-6px); border-color: var(--s7-yellow); box-shadow: 0 16px 34px rgba(0,0,0,.4); }
+.step-num { transition: transform .2s ease; display: inline-block; }
+.step:hover .step-num { transform: scale(1.12); }
+
+/* Buttons: glow + smoother transition */
+.btn { transition: transform .15s ease, background .15s ease, color .15s ease, border-color .15s ease, box-shadow .2s ease; }
+.btn-primary:hover { box-shadow: 0 10px 26px rgba(220,225,64,.4); }
+.social { transition: transform .15s ease, border-color .15s ease, color .15s ease, box-shadow .2s ease; }
+.social:hover { box-shadow: 0 6px 18px rgba(220,225,64,.25); }
+
+/* FAQ open/hover accent */
+.faq-item { transition: border-color .2s ease, background .2s ease; }
+.faq-item:hover { border-color: rgba(220,225,64,.5); }
+.faq-item[open] { border-color: var(--s7-yellow); }
+
+/* Reveal on scroll (class toggled by JS) */
+.reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s ease, transform .7s ease; }
+.reveal.in { opacity: 1; transform: none; }
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .reveal { opacity: 1; transform: none; }
+  .hero-bg::before, .hero::before { display: none; }
+}
+
+/* Shield grid responsive (kept after base so it wins on small screens) */
+@media (max-width: 860px) { .club-row { grid-template-columns: repeat(4, 1fr); max-width: 520px; } }
+@media (max-width: 560px) { .club-row { grid-template-columns: repeat(3, 1fr); } }

@@ -77,12 +77,21 @@
   const SHIELD_PATH = "M16,9 H84 Q90,9 90,15 V56 Q90,85 50,106 Q10,85 10,56 V15 Q10,9 16,9 Z";
 
   function shieldSVG(c) {
-    const fill = c.stripe ? "url(#s7stripes)" : c.bg;
-    const defs = c.stripe
-      ? '<defs><pattern id="s7stripes" patternUnits="userSpaceOnUse" width="14" height="14"><rect width="14" height="14" fill="#fff"/><rect width="7" height="14" fill="#000"/></pattern></defs>'
-      : "";
-    return `<svg class="shield-svg" viewBox="0 0 100 112" aria-hidden="true">${defs}` +
-      `<path d="${SHIELD_PATH}" fill="${fill}" stroke="${c.border}" stroke-width="5" stroke-linejoin="round"/></svg>`;
+    if (c.stripe) {
+      // Black/white stripes drawn as explicit bars, clipped to the shield shape.
+      return `<svg class="shield-svg" viewBox="0 0 100 112" aria-hidden="true">` +
+        `<clipPath id="s7clip"><path d="${SHIELD_PATH}"/></clipPath>` +
+        `<g clip-path="url(#s7clip)">` +
+        `<rect x="0" y="0" width="100" height="112" fill="#ffffff"/>` +
+        `<rect x="0" y="0" width="14" height="112" fill="#000000"/>` +
+        `<rect x="28" y="0" width="14" height="112" fill="#000000"/>` +
+        `<rect x="56" y="0" width="14" height="112" fill="#000000"/>` +
+        `<rect x="84" y="0" width="14" height="112" fill="#000000"/>` +
+        `</g>` +
+        `<path d="${SHIELD_PATH}" fill="none" stroke="${c.border}" stroke-width="5" stroke-linejoin="round"/></svg>`;
+    }
+    return `<svg class="shield-svg" viewBox="0 0 100 112" aria-hidden="true">` +
+      `<path d="${SHIELD_PATH}" fill="${c.bg}" stroke="${c.border}" stroke-width="5" stroke-linejoin="round"/></svg>`;
   }
 
   function renderClubRow() {
@@ -246,6 +255,23 @@
     if (m) { m.classList.remove("open"); m.setAttribute("aria-hidden", "true"); }
   }
 
+  // ---- reveal on scroll ----
+  function setupReveal() {
+    const els = document.querySelectorAll(
+      ".step, .prize, .faq-item, .slip, .table-wrap, .section-title, .section-lead, .cta-inner, .legal-content"
+    );
+    if (!els.length) return;
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce || !("IntersectionObserver" in window)) return; // leave content fully visible
+    els.forEach((el) => el.classList.add("reveal"));
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+    els.forEach((el) => io.observe(el));
+  }
+
   // ---- wire up events ----
   function init() {
     renderClubRow();
@@ -316,6 +342,7 @@
     const year = $("#year");
     if (year) year.textContent = new Date().getFullYear();
 
+    setupReveal();
     updateStatus();
     tick();
     setInterval(tick, 1000);
