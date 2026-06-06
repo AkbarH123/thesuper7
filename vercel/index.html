@@ -35,14 +35,14 @@
   <!-- ===== Header ===== -->
   <header class="site-header" id="top">
     <div class="container header-inner">
-      <a class="brand" href="#top">
+      <a class="brand" href="index.html">
         <img src="brand/assets/logo.png" alt="The Super 7" class="brand-mark" />
       </a>
       <nav class="nav" id="nav">
         <a href="#how">How it works</a>
-        <a href="#play">Play</a>
+        <a href="game.html">Play</a>
         <a href="#prizes">Prizes</a>
-        <a href="#leaderboard">Leaderboard</a>
+        <a href="leaderboard.html">Leaderboard</a>
         <a href="#faq">FAQ</a>
       </nav>
       <div class="header-actions">
@@ -51,7 +51,7 @@
             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
           </svg>
         </a>
-        <a href="#play" class="btn btn-ghost">Try the demo</a>
+        <a href="game.html" class="btn btn-ghost">Play</a>
         <a href="#notify" class="btn btn-primary">Notify me</a>
       </div>
       <button class="menu-toggle" id="menuToggle" aria-label="Menu">☰</button>
@@ -77,7 +77,7 @@
 
       <div class="hero-cta">
         <a href="#how" class="btn btn-ghost btn-lg">How it works</a>
-        <a href="#play" class="btn btn-ghost btn-lg">Try the demo</a>
+        <a href="game.html" class="btn btn-ghost btn-lg">Play now</a>
       </div>
 
       <div class="jackpot">
@@ -115,40 +115,14 @@
           <p>Points for exact scores, correct results and first scorers. Most points wins, and if you call them all the jackpot is yours.</p>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- ===== Play / Predictor demo ===== -->
-  <section class="section section-alt" id="play">
-    <div class="container">
-      <div class="play-head">
-        <div>
-          <h2 class="section-title">Sneak peek: your Super 7 slip</h2>
-          <p class="section-lead">Gameweek 34. Predict each score and each team's first scorer.</p>
-        </div>
-        <div class="deadline">
-          <span class="deadline-label">Deadline</span>
-          <span class="deadline-timer" id="timer">--:--:--</span>
-        </div>
+      <div class="section-cta">
+        <a href="game.html" class="btn btn-primary btn-lg">Play now</a>
       </div>
-
-      <div class="slip">
-        <div class="fixtures" id="fixtures"><!-- injected by JS --></div>
-
-        <div class="slip-footer">
-          <p class="slip-status" id="slipStatus">0 / 7 predictions made</p>
-          <div class="slip-actions">
-            <button class="btn btn-ghost" id="clearBtn">Clear slip</button>
-            <button class="btn btn-primary btn-lg" id="submitBtn" disabled>Submit predictions</button>
-          </div>
-        </div>
-      </div>
-      <p class="demo-note">This is an interactive demo. Predictions save in your browser, with no account or money required.</p>
     </div>
   </section>
 
   <!-- ===== Prizes ===== -->
-  <section class="section" id="prizes">
+  <section class="section section-alt" id="prizes">
     <div class="container">
       <h2 class="section-title">Prizes</h2>
       <p class="section-lead">Free to enter, with real cash and prizes up for grabs.</p>
@@ -170,22 +144,6 @@
           <span class="prize-amount">£1,000</span>
           <p><strong>Beat the Pundit.</strong> Outscore our weekly ambassador in a head to head.</p>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== Leaderboard ===== -->
-  <section class="section section-alt" id="leaderboard">
-    <div class="container">
-      <h2 class="section-title">Leaderboard</h2>
-      <p class="section-lead">Gameweek 34 top predictors</p>
-      <div class="table-wrap">
-        <table class="leaderboard">
-          <thead>
-            <tr><th>#</th><th>Player</th><th>Exact</th><th class="num">Points</th></tr>
-          </thead>
-          <tbody id="leaderboardBody"><!-- injected by JS --></tbody>
-        </table>
       </div>
     </div>
   </section>
@@ -236,7 +194,7 @@
   <section class="cta-strip">
     <div class="container cta-inner">
       <h2>Ready to call it?</h2>
-      <a href="#play" class="btn btn-primary btn-lg">Make your predictions</a>
+      <a href="game.html" class="btn btn-primary btn-lg">Make your predictions</a>
     </div>
   </section>
 
@@ -248,9 +206,9 @@
       </div>
       <nav class="footer-nav">
         <a href="#how">How it works</a>
-        <a href="#play">Play</a>
+        <a href="game.html">Play</a>
         <a href="#prizes">Prizes</a>
-        <a href="#leaderboard">Leaderboard</a>
+        <a href="leaderboard.html">Leaderboard</a>
         <a href="#faq">FAQ</a>
         <a href="rules.html">Rules &amp; T&amp;Cs</a>
       </nav>
@@ -264,16 +222,6 @@
       <p class="footer-legal">© <span id="year"></span> The Super 7. Free to play. 18+. Preview site. Not affiliated with any club or league.</p>
     </div>
   </footer>
-
-  <!-- ===== Success modal ===== -->
-  <div class="modal" id="modal" aria-hidden="true">
-    <div class="modal-card">
-      <div class="modal-check">✓</div>
-      <h3>Slip submitted!</h3>
-      <p id="modalText">You're in for Gameweek 34. Good luck!</p>
-      <button class="btn btn-primary" id="modalClose">Done</button>
-    </div>
-  </div>
 
   <script src="js/app.js"></script>
 </body>

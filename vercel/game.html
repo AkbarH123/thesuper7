@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Play | The Super 7</title>
+  <meta name="description" content="Make your Super 7 predictions: pick the score and first goalscorer for each of the seven clubs this gameweek." />
+  <link rel="canonical" href="https://www.thesuper7.com/game" />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#1A1B1D" />
+  <link rel="icon" href="brand/assets/logo.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- ===== Header ===== -->
+  <header class="site-header" id="top">
+    <div class="container header-inner">
+      <a class="brand" href="index.html">
+        <img src="brand/assets/logo.png" alt="The Super 7" class="brand-mark" />
+      </a>
+      <nav class="nav" id="nav">
+        <a href="index.html#how">How it works</a>
+        <a href="game.html">Play</a>
+        <a href="index.html#prizes">Prizes</a>
+        <a href="leaderboard.html">Leaderboard</a>
+        <a href="index.html#faq">FAQ</a>
+      </nav>
+      <div class="header-actions">
+        <a class="social social-sm" href="https://x.com/_TheSuper7_" target="_blank" rel="noopener" aria-label="The Super 7 on X">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+          </svg>
+        </a>
+        <a href="leaderboard.html" class="btn btn-ghost">Leaderboard</a>
+        <a href="index.html#notify" class="btn btn-primary">Notify me</a>
+      </div>
+      <button class="menu-toggle" id="menuToggle" aria-label="Menu">☰</button>
+    </div>
+  </header>
+
+  <!-- ===== Game ===== -->
+  <main class="section page-top">
+    <div class="container">
+      <div class="play-head">
+        <div>
+          <h1 class="section-title">Your Super 7 slip</h1>
+          <p class="section-lead">Gameweek 34. Predict each score and each team's first scorer.</p>
+        </div>
+        <div class="deadline">
+          <span class="deadline-label">Deadline</span>
+          <span class="deadline-timer" id="timer">--:--:--</span>
+        </div>
+      </div>
+
+      <div class="slip">
+        <div class="fixtures" id="fixtures"><!-- injected by JS --></div>
+
+        <div class="slip-footer">
+          <p class="slip-status" id="slipStatus">0 / 7 predictions made</p>
+          <div class="slip-actions">
+            <button class="btn btn-ghost" id="clearBtn">Clear slip</button>
+            <button class="btn btn-primary btn-lg" id="submitBtn" disabled>Submit predictions</button>
+          </div>
+        </div>
+      </div>
+      <p class="demo-note">This is a preview. Predictions save in your browser, with no account or money required yet.</p>
+    </div>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <img src="brand/assets/logo.png" alt="The Super 7" class="brand-mark" />
+      </div>
+      <nav class="footer-nav">
+        <a href="index.html#how">How it works</a>
+        <a href="game.html">Play</a>
+        <a href="index.html#prizes">Prizes</a>
+        <a href="leaderboard.html">Leaderboard</a>
+        <a href="index.html#faq">FAQ</a>
+        <a href="rules.html">Rules &amp; T&amp;Cs</a>
+      </nav>
+      <div class="socials">
+        <a class="social" href="https://x.com/_TheSuper7_" target="_blank" rel="noopener" aria-label="The Super 7 on X (Twitter)">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+          </svg>
+        </a>
+      </div>
+      <p class="footer-legal">© <span id="year"></span> The Super 7. Free to play. 18+. Preview site. Not affiliated with any club or league.</p>
+    </div>
+  </footer>
+
+  <!-- ===== Success modal ===== -->
+  <div class="modal" id="modal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-check">&#10003;</div>
+      <h3>Slip submitted!</h3>
+      <p id="modalText">You're in for Gameweek 34. Good luck!</p>
+      <button class="btn btn-primary" id="modalClose">Done</button>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
