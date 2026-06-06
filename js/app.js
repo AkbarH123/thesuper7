@@ -122,12 +122,13 @@
     const row = $("#clubRow");
     if (!row) return;
     row.innerHTML = Object.entries(CLUBS).map(([code, c]) => {
-      const nameStyle = c.stripe
-        ? `background:#fff;color:#000;padding:3px 8px;border-radius:4px;border:1px solid ${c.border}`
-        : `color:${c.text}`;
       const body = c.stripe ? stripedShieldImg(c) : shieldSVG(c);
+      const nameInner = c.stripe
+        ? `<span class="name-chip" style="border-color:${c.border}">${c.name}</span>`
+        : c.name;
+      const nameStyle = c.stripe ? "" : `color:${c.text}`;
       return `<div class="shield" title="${c.name}">${body}` +
-        `<span class="shield-name" style="${nameStyle}">${c.name}</span></div>`;
+        `<span class="shield-name" style="${nameStyle}">${nameInner}</span></div>`;
     }).join("");
   }
 

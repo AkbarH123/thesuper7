@@ -84,6 +84,7 @@ img { max-width: 100%; display: block; }
   padding: 0 14% 26%; text-align: center;
   font-family: var(--s7-font-display); font-size: 1rem; letter-spacing: .5px; line-height: 1.05;
 }
+.name-chip { background: #fff; color: #000; padding: 3px 8px; border-radius: 4px; border: 1px solid #fff; }
 
 .notify { display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; margin: 0 auto 1rem; max-width: 520px; }
 .notify-input { flex: 1 1 240px; padding: .95rem 1.1rem; font-size: 1rem; font-family: var(--s7-font-body); background: rgba(26,27,29,.6); color: var(--s7-text); border: 1.5px solid var(--s7-border); border-radius: var(--s7-radius); }
