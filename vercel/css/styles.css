@@ -74,20 +74,15 @@ img { max-width: 100%; display: block; }
 .hero-title .hl { color: var(--s7-yellow); }
 .hero-sub { max-width: 620px; margin: 1.2rem auto 0; color: var(--s7-text-muted); font-size: 1.15rem; }
 
-.club-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(108px, 1fr)); gap: 14px; max-width: 920px; margin: 2.2rem auto; }
-/* Pointed shield: flat top, straight sides, point at the bottom centre. */
-.shield {
-  height: 150px; padding: 3px; /* padding = visible border thickness */
-  clip-path: polygon(0 0, 100% 0, 100% 60%, 50% 100%, 0 60%);
-  filter: drop-shadow(0 6px 14px rgba(0,0,0,.4));
+.club-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)); gap: 14px; max-width: 940px; margin: 2.2rem auto; }
+/* Heraldic shield rendered as an inline SVG, with the name overlaid. */
+.shield { position: relative; filter: drop-shadow(0 6px 14px rgba(0,0,0,.4)); }
+.shield-svg { width: 100%; height: auto; display: block; }
+.shield-name {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  padding: 0 14% 26%; text-align: center;
+  font-family: var(--s7-font-display); font-size: 1rem; letter-spacing: .5px; line-height: 1.05;
 }
-.shield-inner {
-  height: 100%; display: flex; align-items: center; justify-content: center;
-  padding: 8px 8px 38px; /* push text up off the point */
-  clip-path: polygon(0 0, 100% 0, 100% 60%, 50% 100%, 0 60%);
-  box-shadow: inset 0 0 20px rgba(0,0,0,.3);
-}
-.shield-name { font-family: var(--s7-font-display); font-size: 1rem; letter-spacing: .5px; text-align: center; line-height: 1.1; }
 
 .notify { display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; margin: 0 auto 1rem; max-width: 520px; }
 .notify-input { flex: 1 1 240px; padding: .95rem 1.1rem; font-size: 1rem; font-family: var(--s7-font-body); background: rgba(26,27,29,.6); color: var(--s7-text); border: 1.5px solid var(--s7-border); border-radius: var(--s7-radius); }
@@ -282,9 +277,7 @@ img { max-width: 100%; display: block; }
   .score-val { font-size: 1.4rem; }
   .stepper button { width: 32px; height: 28px; }   /* bigger touch targets */
   .club-row { grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .shield { height: 118px; }
-  .shield-inner { padding-bottom: 30px; }
-  .shield-name { font-size: .82rem; }
+  .shield-name { font-size: .8rem; padding-bottom: 24%; }
   .notify { flex-direction: column; }
   .notify-input, .notify .btn { width: 100%; }
   .btn-lg { width: 100%; }

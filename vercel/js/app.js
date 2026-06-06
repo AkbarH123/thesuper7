@@ -73,19 +73,27 @@
   let slip = loadSlip(); // { "0": { h, a, scorer }, ... }
 
   // ---- render: hero club row ----
+  // Classic heraldic shield: rounded top corners, straight sides, curved point.
+  const SHIELD_PATH = "M16,9 H84 Q90,9 90,15 V56 Q90,85 50,106 Q10,85 10,56 V15 Q10,9 16,9 Z";
+
+  function shieldSVG(c) {
+    const fill = c.stripe ? "url(#s7stripes)" : c.bg;
+    const defs = c.stripe
+      ? '<defs><pattern id="s7stripes" patternUnits="userSpaceOnUse" width="14" height="14"><rect width="14" height="14" fill="#fff"/><rect width="7" height="14" fill="#000"/></pattern></defs>'
+      : "";
+    return `<svg class="shield-svg" viewBox="0 0 100 112" aria-hidden="true">${defs}` +
+      `<path d="${SHIELD_PATH}" fill="${fill}" stroke="${c.border}" stroke-width="5" stroke-linejoin="round"/></svg>`;
+  }
+
   function renderClubRow() {
     const row = $("#clubRow");
     if (!row) return;
     row.innerHTML = Object.entries(CLUBS).map(([code, c]) => {
-      const innerBg = c.stripe ? STRIPES : c.bg;
       const nameStyle = c.stripe
         ? `background:#fff;color:#000;padding:3px 8px;border-radius:4px;border:1px solid ${c.border}`
         : `color:${c.text}`;
-      return `<div class="shield" style="background:${c.border}" title="${c.name}">
-        <div class="shield-inner" style="background:${innerBg}">
-          <span class="shield-name" style="${nameStyle}">${c.name}</span>
-        </div>
-      </div>`;
+      return `<div class="shield" title="${c.name}">${shieldSVG(c)}` +
+        `<span class="shield-name" style="${nameStyle}">${c.name}</span></div>`;
     }).join("");
   }
 
