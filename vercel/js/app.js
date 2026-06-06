@@ -77,19 +77,6 @@
   const SHIELD_PATH = "M16,9 H84 Q90,9 90,15 V56 Q90,85 50,106 Q10,85 10,56 V15 Q10,9 16,9 Z";
 
   function shieldSVG(c) {
-    if (c.stripe) {
-      // Black/white stripes drawn as explicit bars, clipped to the shield shape.
-      return `<svg class="shield-svg" viewBox="0 0 100 112" aria-hidden="true">` +
-        `<clipPath id="s7clip"><path d="${SHIELD_PATH}"/></clipPath>` +
-        `<g clip-path="url(#s7clip)">` +
-        `<rect x="0" y="0" width="100" height="112" fill="#ffffff"/>` +
-        `<rect x="0" y="0" width="14" height="112" fill="#000000"/>` +
-        `<rect x="28" y="0" width="14" height="112" fill="#000000"/>` +
-        `<rect x="56" y="0" width="14" height="112" fill="#000000"/>` +
-        `<rect x="84" y="0" width="14" height="112" fill="#000000"/>` +
-        `</g>` +
-        `<path d="${SHIELD_PATH}" fill="none" stroke="${c.border}" stroke-width="5" stroke-linejoin="round"/></svg>`;
-    }
     return `<svg class="shield-svg" viewBox="0 0 100 112" aria-hidden="true">` +
       `<path d="${SHIELD_PATH}" fill="${c.bg}" stroke="${c.border}" stroke-width="5" stroke-linejoin="round"/></svg>`;
   }
@@ -101,7 +88,10 @@
       const nameStyle = c.stripe
         ? `background:#fff;color:#000;padding:3px 8px;border-radius:4px;border:1px solid ${c.border}`
         : `color:${c.text}`;
-      return `<div class="shield" title="${c.name}">${shieldSVG(c)}` +
+      const body = c.stripe
+        ? `<div class="shield-striped" style="background:${c.border}"><span class="shield-stripes"></span></div>`
+        : shieldSVG(c);
+      return `<div class="shield" title="${c.name}">${body}` +
         `<span class="shield-name" style="${nameStyle}">${c.name}</span></div>`;
     }).join("");
   }
