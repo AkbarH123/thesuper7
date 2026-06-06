@@ -159,6 +159,10 @@ img { max-width: 100%; display: block; }
 .scorer-select { background: var(--s7-ink); color: var(--s7-text); border: 1.5px solid var(--s7-border); border-radius: 8px; padding: .55rem .8rem; font-family: var(--s7-font-body); font-size: .92rem; min-width: 210px; cursor: pointer; }
 .section-alt .scorer-select { background: var(--s7-ink); }
 .scorer-select:focus { outline: none; border-color: var(--s7-yellow); }
+.scorer-input { background: var(--s7-ink); color: var(--s7-text); border: 1.5px solid var(--s7-border); border-radius: 8px; padding: .55rem .8rem; font-family: var(--s7-font-body); font-size: .92rem; min-width: 210px; }
+.scorer-input::placeholder { color: var(--s7-slate); }
+.scorer-input:focus { outline: none; border-color: var(--s7-yellow); }
+.fixture-date { text-align: center; font-size: .72rem; letter-spacing: .5px; text-transform: uppercase; color: var(--s7-text-muted); }
 .team { display: flex; align-items: center; gap: .7rem; }
 .team.away { flex-direction: row-reverse; }
 .team-name { font-weight: 600; }
@@ -285,7 +289,7 @@ img { max-width: 100%; display: block; }
   .steps, .prizes { grid-template-columns: 1fr; }
   .fixture { padding: 1rem .7rem; }
   .fixture-main { gap: .4rem; }
-  .scorer-select { min-width: 0; flex: 1 1 100%; }
+  .scorer-select, .scorer-input { min-width: 0; flex: 1 1 100%; }
   .fixture-scorer label { font-size: .72rem; }
   .team { gap: .45rem; }
   .team-name { font-size: .8rem; }

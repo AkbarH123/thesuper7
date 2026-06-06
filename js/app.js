@@ -1,14 +1,14 @@
-/* The Super 7 — interactive demo
-   Client-side only. Predictions persist in localStorage.
-   Mechanic: for each of the 7 Super 7 clubs' games, predict the score AND the
-   club's first goalscorer. */
+/* The Super 7 — front-end logic
+   - Landing: renders the club shields, notify form, scroll reveal.
+   - Game: loads upcoming fixtures from /api/fixtures (TheSportsDB via a Vercel
+     function), falling back to demo fixtures when the API isn't reachable.
+   - Leaderboard: renders the standings table.
+   Predictions persist in localStorage. */
 
 (function () {
   "use strict";
 
   // ---- The Super 7 clubs (home colour schemes) ----
-  // bg = background, text = label colour, border = shield/badge border.
-  // stripe = render black/white stripes (Newcastle).
   const CLUBS = {
     ARS: { name: "Arsenal",    bg: "#EF0107", text: "#FFFFFF", border: "#DAA520" },
     CHE: { name: "Chelsea",    bg: "#034694", text: "#FFFFFF", border: "#FFFFFF" },
@@ -19,7 +19,18 @@
     TOT: { name: "Tottenham",  bg: "#FFFFFF", text: "#132257", border: "#132257" },
   };
 
-  // Candidate first scorers per Super 7 club (demo squad lists).
+  // Map various team-name spellings (from the API) to our club codes.
+  const NAME_TO_CODE = {
+    "arsenal": "ARS",
+    "chelsea": "CHE",
+    "liverpool": "LIV",
+    "manchester city": "MCI", "man city": "MCI",
+    "manchester united": "MUN", "man united": "MUN", "manchester utd": "MUN",
+    "newcastle": "NEW", "newcastle united": "NEW",
+    "tottenham": "TOT", "tottenham hotspur": "TOT", "spurs": "TOT",
+  };
+
+  // First-scorer suggestions per club (datalist hints; free text still allowed).
   const SCORERS = {
     ARS: ["Saka", "Havertz", "Martinelli", "Ødegaard", "Jesus", "Trossard"],
     CHE: ["Palmer", "Jackson", "Nkunku", "Madueke", "Neto", "Sterling"],
@@ -30,15 +41,15 @@
     TOT: ["Son", "Solanke", "Richarlison", "Kulusevski", "Maddison", "Johnson"],
   };
 
-  // GW34 fixtures — each features exactly one Super 7 club.
-  const FIXTURES = [
-    { home: "ARS", away: "AVL", awayName: "Aston Villa",    awayColor: "#670E36" },
-    { home: "CHE", away: "BHA", awayName: "Brighton",       awayColor: "#0057B8" },
-    { home: "EVE", away: "LIV", homeName: "Everton",        homeColor: "#003399" },
-    { home: "MCI", away: "WOL", awayName: "Wolves",         awayColor: "#FDB913" },
-    { home: "FUL", away: "MUN", homeName: "Fulham",         homeColor: "#000000" },
-    { home: "NEW", away: "BRE", awayName: "Brentford",      awayColor: "#E30613" },
-    { home: "TOT", away: "CRY", awayName: "Crystal Palace", awayColor: "#1B458F" },
+  // Fallback fixtures (used when /api/fixtures is unavailable, e.g. opened locally).
+  const DEMO_FIXTURES = [
+    { id: "demo-0", home: "Arsenal",    away: "Aston Villa",    super7: "Arsenal" },
+    { id: "demo-1", home: "Chelsea",    away: "Brighton",       super7: "Chelsea" },
+    { id: "demo-2", home: "Everton",    away: "Liverpool",      super7: "Liverpool" },
+    { id: "demo-3", home: "Man City",   away: "Wolves",         super7: "Man City" },
+    { id: "demo-4", home: "Fulham",     away: "Man United",     super7: "Man United" },
+    { id: "demo-5", home: "Newcastle",  away: "Brentford",      super7: "Newcastle" },
+    { id: "demo-6", home: "Tottenham",  away: "Crystal Palace", super7: "Tottenham" },
   ];
 
   const LEADERBOARD = [
@@ -52,30 +63,38 @@
     { name: "Pep_Roulette",   exact: 2, pts: 15 },
   ];
 
-  const STORE_KEY = "super7.slip.gw34.v2";
+  const STORE_KEY = "super7.slip.v3";
   const NOTIFY_KEY = "super7.notify";
 
   // ---- helpers ----
   const $ = (sel, root = document) => root.querySelector(sel);
-  const clubMeta = (code, fallbackName, fallbackColor) =>
-    CLUBS[code] || { name: fallbackName || code, bg: fallbackColor || "#555", text: "#FFFFFF", border: "rgba(255,255,255,.25)" };
-  const STRIPES = "repeating-linear-gradient(90deg,#000,#000 14px,#fff 14px,#fff 28px)";
-  const super7Code = (f) => (CLUBS[f.home] ? f.home : f.away);
+  const codeFor = (name) => NAME_TO_CODE[(name || "").trim().toLowerCase()] || null;
+  const meta = (name) => {
+    const c = codeFor(name);
+    return c ? CLUBS[c] : { name: name || "TBC", bg: "#555", text: "#FFFFFF", border: "rgba(255,255,255,.25)" };
+  };
+  const abbr = (name) => {
+    const c = codeFor(name);
+    if (c) return c;
+    return (name || "TBC").replace(/[^A-Za-z ]/g, "").split(" ").map((w) => w[0]).join("").slice(0, 3).toUpperCase();
+  };
+
+  const SHIELD_PATH = "M16,9 H84 Q90,9 90,15 V56 Q90,85 50,106 Q10,85 10,56 V15 Q10,9 16,9 Z";
 
   function loadSlip() {
     try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }
     catch (e) { return {}; }
   }
-  function saveSlip(slip) {
+  function saveSlip() {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(slip)); } catch (e) {}
   }
 
-  let slip = loadSlip(); // { "0": { h, a, scorer }, ... }
+  let slip = loadSlip();   // { [fixtureId]: { h, a, scorer } }
+  let FIXTURES = [];
 
-  // ---- render: hero club row ----
-  // Classic heraldic shield: rounded top corners, straight sides, curved point.
-  const SHIELD_PATH = "M16,9 H84 Q90,9 90,15 V56 Q90,85 50,106 Q10,85 10,56 V15 Q10,9 16,9 Z";
-
+  // ============================================================
+  //  Landing: club shields
+  // ============================================================
   function shieldSVG(c) {
     return `<svg class="shield-svg" viewBox="0 0 100 112" aria-hidden="true">` +
       `<path d="${SHIELD_PATH}" fill="${c.bg}" stroke="${c.border}" stroke-width="5" stroke-linejoin="round"/></svg>`;
@@ -96,28 +115,63 @@
     }).join("");
   }
 
-  // ---- render: fixtures ----
+  // ============================================================
+  //  Game: fixtures + predictions
+  // ============================================================
+  async function loadFixtures() {
+    const wrap = $("#fixtures");
+    if (!wrap) return; // not the game page
+    try {
+      const r = await fetch("/api/fixtures", { headers: { Accept: "application/json" } });
+      if (!r.ok) throw new Error("status " + r.status);
+      const data = await r.json();
+      if (data && Array.isArray(data.fixtures) && data.fixtures.length) {
+        FIXTURES = data.fixtures;
+      } else {
+        throw new Error("no fixtures");
+      }
+    } catch (e) {
+      FIXTURES = DEMO_FIXTURES; // graceful fallback
+    }
+    renderFixtures();
+    startCountdown();
+    updateStatus();
+  }
+
+  function badge(name) {
+    const m = meta(name);
+    const bg = m.stripe ? "#000000" : m.bg;
+    return `<span class="team-badge" style="background:${bg};color:${m.text};border:1.5px solid ${m.border}">${abbr(name)}</span>`;
+  }
+
+  function fixtureDateLabel(f) {
+    if (!f.date) return "";
+    const ts = Date.parse(`${f.date}T${f.time || "15:00:00"}Z`);
+    if (!isFinite(ts)) return "";
+    try {
+      return new Date(ts).toLocaleString(undefined, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    } catch (e) { return f.date; }
+  }
+
   function renderFixtures() {
     const wrap = $("#fixtures");
     if (!wrap) return;
-    wrap.innerHTML = FIXTURES.map((f, i) => {
-      const h = clubMeta(f.home, f.homeName, f.homeColor);
-      const a = clubMeta(f.away, f.awayName, f.awayColor);
-      const s7 = super7Code(f);
-      const pick = slip[i] || {};
+    wrap.innerHTML = FIXTURES.map((f) => {
+      const s7code = codeFor(f.super7) || codeFor(f.home) || codeFor(f.away);
+      const s7name = (s7code && CLUBS[s7code].name) || f.super7 || f.home;
+      const pick = slip[f.id] || {};
       const hv = Number.isInteger(pick.h) ? pick.h : "-";
       const av = Number.isInteger(pick.a) ? pick.a : "-";
-      const opts = ['<option value="">First scorer…</option>']
-        .concat(SCORERS[s7].map((p) =>
-          `<option value="${p}"${pick.scorer === p ? " selected" : ""}>${p}</option>`))
-        .concat(`<option value="No goalscorer"${pick.scorer === "No goalscorer" ? " selected" : ""}>No goalscorer (0 for ${CLUBS[s7].name})</option>`)
-        .join("");
+      const dl = (SCORERS[s7code] || []).concat("No goalscorer")
+        .map((p) => `<option value="${p}"></option>`).join("");
+      const when = fixtureDateLabel(f);
       return `
-      <div class="fixture" data-i="${i}">
+      <div class="fixture" data-id="${f.id}">
+        ${when ? `<div class="fixture-date">${when}</div>` : ""}
         <div class="fixture-main">
           <div class="team home">
-            <span class="team-badge" style="background:${h.bg};color:${h.text};border:1.5px solid ${h.border}">${f.home}</span>
-            <span class="team-name">${h.name}</span>
+            ${badge(f.home)}
+            <span class="team-name">${f.home}</span>
           </div>
           <div class="score">
             <div class="stepper" data-side="h">
@@ -133,16 +187,15 @@
             </div>
           </div>
           <div class="team away">
-            <span class="team-badge" style="background:${a.bg};color:${a.text};border:1.5px solid ${a.border}">${f.away}</span>
-            <span class="team-name">${a.name}</span>
+            ${badge(f.away)}
+            <span class="team-name">${f.away}</span>
           </div>
         </div>
         <div class="fixture-scorer">
-          <label for="scorer-${i}">
-            <span class="scorer-badge" style="background:${CLUBS[s7].bg};color:${CLUBS[s7].text};border-color:${CLUBS[s7].border}">${s7}</span>
-            ${CLUBS[s7].name} first scorer
-          </label>
-          <select class="scorer-select" id="scorer-${i}" data-i="${i}">${opts}</select>
+          <label for="scorer-${f.id}">${s7name} first scorer</label>
+          <input class="scorer-input" id="scorer-${f.id}" data-id="${f.id}" list="dl-${f.id}"
+                 placeholder="First scorer" value="${pick.scorer ? String(pick.scorer).replace(/"/g, "&quot;") : ""}" />
+          <datalist id="dl-${f.id}">${dl}</datalist>
         </div>
       </div>`;
     }).join("");
@@ -152,92 +205,93 @@
   function isComplete(p) {
     return p && Number.isInteger(p.h) && Number.isInteger(p.a) && !!p.scorer;
   }
-
   function markDone() {
     document.querySelectorAll(".fixture").forEach((el) => {
-      el.classList.toggle("done", isComplete(slip[el.dataset.i]));
+      el.classList.toggle("done", isComplete(slip[el.dataset.id]));
     });
   }
 
-  // ---- score stepping ----
-  function step(i, side, delta) {
-    const p = slip[i] || {};
+  function step(id, side, delta) {
+    const p = slip[id] || {};
     let v = Number.isInteger(p[side]) ? p[side] : 0;
     v = Math.max(0, Math.min(15, v + delta));
     p[side] = v;
-    slip[i] = p;
-    saveSlip(slip);
-    const fixtureEl = document.querySelector(`.fixture[data-i="${i}"]`);
-    if (fixtureEl) fixtureEl.querySelector(`.score-val[data-side="${side}"]`).textContent = v;
+    slip[id] = p;
+    saveSlip();
+    const el = document.querySelector(`.fixture[data-id="${id}"]`);
+    if (el) el.querySelector(`.score-val[data-side="${side}"]`).textContent = v;
     markDone();
     updateStatus();
   }
 
-  // ---- status + submit gating ----
   function completeCount() {
-    let n = 0;
-    for (let i = 0; i < FIXTURES.length; i++) if (isComplete(slip[i])) n++;
-    return n;
+    return FIXTURES.reduce((n, f) => n + (isComplete(slip[f.id]) ? 1 : 0), 0);
   }
 
   function updateStatus() {
+    const total = FIXTURES.length || 7;
     const n = completeCount();
     const status = $("#slipStatus");
     const submit = $("#submitBtn");
     if (status) {
-      status.textContent = `${n} / 7 predictions complete` +
-        (n < 7 ? ", add scores and first scorers" : ", ready to submit");
-      status.classList.toggle("ready", n === 7);
+      status.textContent = `${n} / ${total} predictions complete` +
+        (n < total ? ", add scores and first scorers" : ", ready to submit");
+      status.classList.toggle("ready", n === total && total > 0);
     }
-    if (submit) submit.disabled = n !== 7;
+    if (submit) submit.disabled = !(n === total && total > 0);
   }
 
-  // ---- countdown to next Saturday 15:00 local ----
-  function nextDeadline() {
+  // ---- countdown to the first fixture (or next Saturday 3pm) ----
+  let deadlineTs = null;
+  function computeDeadline() {
+    const times = FIXTURES
+      .map((f) => Date.parse(`${f.date}T${f.time || "15:00:00"}Z`))
+      .filter((t) => isFinite(t));
+    if (times.length) { deadlineTs = Math.min.apply(null, times); return; }
     const now = new Date();
     const d = new Date(now);
     d.setDate(now.getDate() + ((6 - now.getDay() + 7) % 7));
     d.setHours(15, 0, 0, 0);
     if (d <= now) d.setDate(d.getDate() + 7);
-    return d;
+    deadlineTs = d.getTime();
   }
-  const DEADLINE = nextDeadline();
-
-  function tick() {
+  let countdownTimer = null;
+  function startCountdown() {
     const el = $("#timer");
     if (!el) return;
-    let diff = Math.max(0, DEADLINE - new Date());
-    const dd = Math.floor(diff / 86400000); diff -= dd * 86400000;
-    const hh = Math.floor(diff / 3600000);  diff -= hh * 3600000;
-    const mm = Math.floor(diff / 60000);    diff -= mm * 60000;
-    const ss = Math.floor(diff / 1000);
-    const pad = (n) => String(n).padStart(2, "0");
-    el.textContent = (dd > 0 ? dd + "d " : "") + `${pad(hh)}:${pad(mm)}:${pad(ss)}`;
+    computeDeadline();
+    const tick = () => {
+      let diff = Math.max(0, deadlineTs - Date.now());
+      const dd = Math.floor(diff / 86400000); diff -= dd * 86400000;
+      const hh = Math.floor(diff / 3600000);  diff -= hh * 3600000;
+      const mm = Math.floor(diff / 60000);    diff -= mm * 60000;
+      const ss = Math.floor(diff / 1000);
+      const pad = (n) => String(n).padStart(2, "0");
+      el.textContent = (dd > 0 ? dd + "d " : "") + `${pad(hh)}:${pad(mm)}:${pad(ss)}`;
+    };
+    tick();
+    if (countdownTimer) clearInterval(countdownTimer);
+    countdownTimer = setInterval(tick, 1000);
   }
 
-  // ---- leaderboard ----
+  // ============================================================
+  //  Leaderboard
+  // ============================================================
   function renderLeaderboard() {
     const body = $("#leaderboardBody");
     if (!body) return;
     body.innerHTML = LEADERBOARD.map((r, i) =>
-      `<tr>
-        <td class="lb-rank">${i + 1}</td>
-        <td>${r.name}</td>
-        <td>${r.exact}</td>
-        <td class="num">${r.pts}</td>
-      </tr>`
+      `<tr><td class="lb-rank">${i + 1}</td><td>${r.name}</td><td>${r.exact}</td><td class="num">${r.pts}</td></tr>`
     ).join("");
   }
 
-  // ---- modal ----
+  // ============================================================
+  //  Modal
+  // ============================================================
   function openModal() {
     const m = $("#modal");
     const txt = $("#modalText");
-    if (txt) {
-      txt.textContent =
-        `You're in for Gameweek 34 with all 7 scores and first scorers locked in. ` +
-        `Good luck this week.`;
-    }
+    if (txt) txt.textContent = "Your Super 7 slip is locked in. Good luck this gameweek.";
     if (m) { m.classList.add("open"); m.setAttribute("aria-hidden", "false"); }
   }
   function closeModal() {
@@ -245,69 +299,68 @@
     if (m) { m.classList.remove("open"); m.setAttribute("aria-hidden", "true"); }
   }
 
-  // ---- reveal on scroll ----
+  // ============================================================
+  //  Reveal on scroll
+  // ============================================================
   function setupReveal() {
     const els = document.querySelectorAll(
       ".step, .prize, .faq-item, .slip, .table-wrap, .section-title, .section-lead, .cta-inner, .legal-content"
     );
     if (!els.length) return;
     const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce || !("IntersectionObserver" in window)) return; // leave content fully visible
+    if (reduce || !("IntersectionObserver" in window)) return;
     els.forEach((el) => el.classList.add("reveal"));
     const io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
-      });
+      entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
     }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
     els.forEach((el) => io.observe(el));
   }
 
-  // ---- wire up events ----
+  // ============================================================
+  //  Init
+  // ============================================================
   function init() {
     renderClubRow();
-    renderFixtures();
     renderLeaderboard();
 
-    // delegated stepper clicks
     const fixtures = $("#fixtures");
     if (fixtures) {
       fixtures.addEventListener("click", (e) => {
         const btn = e.target.closest(".stepper button");
         if (!btn) return;
-        const fixtureEl = e.target.closest(".fixture");
-        step(fixtureEl.dataset.i, btn.parentElement.dataset.side, parseInt(btn.dataset.d, 10));
+        const el = e.target.closest(".fixture");
+        step(el.dataset.id, btn.parentElement.dataset.side, parseInt(btn.dataset.d, 10));
       });
-      // first-scorer selects
-      fixtures.addEventListener("change", (e) => {
-        const sel = e.target.closest(".scorer-select");
-        if (!sel) return;
-        const i = sel.dataset.i;
-        const p = slip[i] || {};
-        if (sel.value) p.scorer = sel.value; else delete p.scorer;
-        slip[i] = p;
-        saveSlip(slip);
+      fixtures.addEventListener("input", (e) => {
+        const inp = e.target.closest(".scorer-input");
+        if (!inp) return;
+        const id = inp.dataset.id;
+        const p = slip[id] || {};
+        if (inp.value.trim()) p.scorer = inp.value.trim(); else delete p.scorer;
+        slip[id] = p;
+        saveSlip();
         markDone();
         updateStatus();
       });
+      loadFixtures();
     }
 
     const clearBtn = $("#clearBtn");
     if (clearBtn) clearBtn.addEventListener("click", () => {
-      slip = {};
-      saveSlip(slip);
+      FIXTURES.forEach((f) => { delete slip[f.id]; });
+      saveSlip();
       renderFixtures();
       updateStatus();
     });
 
     const submitBtn = $("#submitBtn");
     if (submitBtn) submitBtn.addEventListener("click", openModal);
-
     const modalClose = $("#modalClose");
     if (modalClose) modalClose.addEventListener("click", closeModal);
     const modal = $("#modal");
     if (modal) modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
 
-    // notify form (front-end only — stores locally, no backend yet)
+    // notify form (front-end only)
     const notifyForm = $("#notify");
     if (notifyForm) {
       notifyForm.addEventListener("submit", (e) => {
@@ -334,8 +387,6 @@
 
     setupReveal();
     updateStatus();
-    tick();
-    setInterval(tick, 1000);
   }
 
   if (document.readyState === "loading") {
