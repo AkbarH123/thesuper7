@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://thesuper7.com/sitemap.xml
+Sitemap: https://www.thesuper7.com/sitemap.xml
