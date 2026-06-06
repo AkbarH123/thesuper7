@@ -6,15 +6,17 @@
 (function () {
   "use strict";
 
-  // ---- The Super 7 clubs (primary colour used for badge chips) ----
+  // ---- The Super 7 clubs (home colour schemes) ----
+  // bg = background, text = label colour, border = shield/badge border.
+  // stripe = render black/white stripes (Newcastle).
   const CLUBS = {
-    ARS: { name: "Arsenal",    color: "#EF0107" },
-    CHE: { name: "Chelsea",    color: "#034694" },
-    LIV: { name: "Liverpool",  color: "#C8102E" },
-    MCI: { name: "Man City",   color: "#6CABDD" },
-    MUN: { name: "Man United", color: "#DA020E" },
-    NEW: { name: "Newcastle",  color: "#241F20" },
-    TOT: { name: "Tottenham",  color: "#132257" },
+    ARS: { name: "Arsenal",    bg: "#EF0107", text: "#FFFFFF", border: "#DAA520" },
+    CHE: { name: "Chelsea",    bg: "#034694", text: "#FFFFFF", border: "#FFFFFF" },
+    LIV: { name: "Liverpool",  bg: "#C8102E", text: "#F6EB61", border: "#F6EB61" },
+    MCI: { name: "Man City",   bg: "#6CABDD", text: "#1C2C5B", border: "#1C2C5B" },
+    MUN: { name: "Man United", bg: "#DA291C", text: "#FFFFFF", border: "#000000" },
+    NEW: { name: "Newcastle",  bg: "#000000", text: "#FFFFFF", border: "#41B6E6", stripe: true },
+    TOT: { name: "Tottenham",  bg: "#FFFFFF", text: "#132257", border: "#132257" },
   };
 
   // Candidate first scorers per Super 7 club (demo squad lists).
@@ -56,7 +58,8 @@
   // ---- helpers ----
   const $ = (sel, root = document) => root.querySelector(sel);
   const clubMeta = (code, fallbackName, fallbackColor) =>
-    CLUBS[code] || { name: fallbackName || code, color: fallbackColor || "#555" };
+    CLUBS[code] || { name: fallbackName || code, bg: fallbackColor || "#555", text: "#FFFFFF", border: "rgba(255,255,255,.25)" };
+  const STRIPES = "repeating-linear-gradient(90deg,#000,#000 14px,#fff 14px,#fff 28px)";
   const super7Code = (f) => (CLUBS[f.home] ? f.home : f.away);
 
   function loadSlip() {
@@ -73,9 +76,15 @@
   function renderClubRow() {
     const row = $("#clubRow");
     if (!row) return;
-    row.innerHTML = Object.entries(CLUBS).map(([code, c]) =>
-      `<span class="club-badge" style="background:${c.color}" title="${c.name}">${code}</span>`
-    ).join("");
+    row.innerHTML = Object.entries(CLUBS).map(([code, c]) => {
+      const bg = c.stripe ? STRIPES : c.bg;
+      const nameStyle = c.stripe
+        ? `color:${c.text};background:#fff;color:#000;padding:3px 8px;border-radius:4px;border:1px solid ${c.border}`
+        : `color:${c.text}`;
+      return `<div class="shield" style="background:${bg};border-color:${c.border}" title="${c.name}">
+        <span class="shield-name" style="${nameStyle}">${c.name}</span>
+      </div>`;
+    }).join("");
   }
 
   // ---- render: fixtures ----
@@ -98,7 +107,7 @@
       <div class="fixture" data-i="${i}">
         <div class="fixture-main">
           <div class="team home">
-            <span class="team-badge" style="background:${h.color}">${f.home}</span>
+            <span class="team-badge" style="background:${h.bg};color:${h.text};border:1.5px solid ${h.border}">${f.home}</span>
             <span class="team-name">${h.name}</span>
           </div>
           <div class="score">
@@ -115,13 +124,13 @@
             </div>
           </div>
           <div class="team away">
-            <span class="team-badge" style="background:${a.color}">${f.away}</span>
+            <span class="team-badge" style="background:${a.bg};color:${a.text};border:1.5px solid ${a.border}">${f.away}</span>
             <span class="team-name">${a.name}</span>
           </div>
         </div>
         <div class="fixture-scorer">
           <label for="scorer-${i}">
-            <span class="scorer-badge" style="background:${CLUBS[s7].color}">${s7}</span>
+            <span class="scorer-badge" style="background:${CLUBS[s7].bg};color:${CLUBS[s7].text};border-color:${CLUBS[s7].border}">${s7}</span>
             ${CLUBS[s7].name} first scorer
           </label>
           <select class="scorer-select" id="scorer-${i}" data-i="${i}">${opts}</select>

@@ -121,13 +121,13 @@ img { max-width: 100%; display: block; }
 .hero-title .hl { color: var(--s7-yellow); }
 .hero-sub { max-width: 620px; margin: 1.2rem auto 0; color: var(--s7-text-muted); font-size: 1.15rem; }
 
-.club-row { display: flex; flex-wrap: wrap; justify-content: center; gap: .8rem; margin: 2rem 0; }
-.club-badge {
-  width: 56px; height: 56px; border-radius: 50%;
-  display: grid; place-items: center; font-weight: 800; font-size: .8rem;
-  color: #fff; border: 2px solid rgba(255,255,255,.25);
-  box-shadow: var(--s7-shadow); letter-spacing: .5px;
+.club-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(108px, 1fr)); gap: 14px; max-width: 920px; margin: 2.2rem auto; }
+.shield {
+  height: 128px; display: flex; align-items: center; justify-content: center;
+  padding: 0 8px 6px; border: 3px solid; border-radius: 0 0 38px 38px;
+  box-shadow: inset 0 0 20px rgba(0,0,0,.35);
 }
+.shield-name { font-family: var(--s7-font-display); font-size: 1rem; letter-spacing: .5px; text-align: center; line-height: 1.1; }
 
 .notify { display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; margin: 0 auto 1rem; max-width: 520px; }
 .notify-input { flex: 1 1 240px; padding: .95rem 1.1rem; font-size: 1rem; font-family: var(--s7-font-body); background: rgba(26,27,29,.6); color: var(--s7-text); border: 1.5px solid var(--s7-border); border-radius: var(--s7-radius); }
@@ -315,7 +315,9 @@ img { max-width: 100%; display: block; }
   .score { gap: .25rem; }
   .score-val { font-size: 1.4rem; }
   .stepper button { width: 32px; height: 28px; }
-  .club-badge { width: 46px; height: 46px; font-size: .68rem; }
+  .club-row { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .shield { height: 96px; border-radius: 0 0 28px 28px; }
+  .shield-name { font-size: .8rem; }
   .notify { flex-direction: column; }
   .notify-input, .notify .btn { width: 100%; }
   .btn-lg { width: 100%; }
