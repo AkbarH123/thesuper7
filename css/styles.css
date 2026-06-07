@@ -1206,7 +1206,8 @@ img { max-width: 100%; display: block; }
   .hero-cta .btn { width: 100%; text-align: center; }
   .notify { flex-direction: column; width: 100%; }
   .notify-input, .notify .btn { width: 100%; }
-  .notify-input { padding: 0.6rem 0.9rem; font-size: 0.9rem; }
+  .notify-input { padding: 0.55rem 0.9rem; font-size: 1rem; line-height: 1.2; height: auto; }
+  .notify .btn-lg { padding: 0.65rem 1.2rem; font-size: 0.95rem; }
   .jackpot { flex-direction: column; gap: var(--sp-1); text-align: center; align-items: center; }
   .club-row { grid-template-columns: repeat(3, 1fr); justify-items: center; }
   .shield-name { font-size: 0.8rem; padding-bottom: 24%; }
