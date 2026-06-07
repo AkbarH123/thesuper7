@@ -175,15 +175,18 @@
     if (!wrap) return;
     wrap.innerHTML = FIXTURES.map((f) => {
       const s7code = codeFor(f.super7) || codeFor(f.home) || codeFor(f.away);
-      const s7name = (s7code && CLUBS[s7code].name) || f.super7 || f.home;
+      const s7club = s7code ? CLUBS[s7code] : null;
+      const s7name = (s7club && s7club.name) || f.super7 || f.home;
+      const clubAccent = s7club ? s7club.bg : "transparent";
       const pick = slip[f.id] || {};
-      const hv = Number.isInteger(pick.h) ? pick.h : "-";
-      const av = Number.isInteger(pick.a) ? pick.a : "-";
+      const hv = Number.isInteger(pick.h) ? pick.h : 0;
+      const av = Number.isInteger(pick.a) ? pick.a : 0;
       const dl = (SCORERS[s7code] || []).concat("No goalscorer")
         .map((p) => `<option value="${p}"></option>`).join("");
       const when = fixtureDateLabel(f);
+      const done = isComplete(pick);
       return `
-      <div class="fixture" data-id="${f.id}">
+      <div class="fixture${done ? " done" : ""}" data-id="${f.id}" style="--club-accent:${clubAccent}">
         ${when ? `<div class="fixture-date">${when}</div>` : ""}
         <div class="fixture-main">
           <div class="team home">
@@ -191,16 +194,16 @@
             <span class="team-name">${f.home}</span>
           </div>
           <div class="score">
-            <div class="stepper" data-side="h">
-              <button type="button" data-d="1" aria-label="Home up">▲</button>
-              <button type="button" data-d="-1" aria-label="Home down">▼</button>
+            <div class="score-control" data-side="h">
+              <button class="score-btn" type="button" data-d="-1" aria-label="Decrease home score">&minus;</button>
+              <span class="score-val" data-side="h">${hv}</span>
+              <button class="score-btn" type="button" data-d="1" aria-label="Increase home score">+</button>
             </div>
-            <span class="score-val" data-side="h">${hv}</span>
-            <span class="score-dash">-</span>
-            <span class="score-val" data-side="a">${av}</span>
-            <div class="stepper" data-side="a">
-              <button type="button" data-d="1" aria-label="Away up">▲</button>
-              <button type="button" data-d="-1" aria-label="Away down">▼</button>
+            <span class="score-dash">&ndash;</span>
+            <div class="score-control" data-side="a">
+              <button class="score-btn" type="button" data-d="-1" aria-label="Decrease away score">&minus;</button>
+              <span class="score-val" data-side="a">${av}</span>
+              <button class="score-btn" type="button" data-d="1" aria-label="Increase away score">+</button>
             </div>
           </div>
           <div class="team away">
@@ -209,14 +212,17 @@
           </div>
         </div>
         <div class="fixture-scorer">
-          <label for="scorer-${f.id}">${s7name} first scorer</label>
+          <label for="scorer-${f.id}">
+            <span class="scorer-badge" style="background:${clubAccent};color:${s7club ? s7club.text : "#fff"}">${s7code || "?"}</span>
+            ${s7name} first scorer
+          </label>
           <input class="scorer-input" id="scorer-${f.id}" data-id="${f.id}" list="dl-${f.id}"
-                 placeholder="First scorer" value="${pick.scorer ? String(pick.scorer).replace(/"/g, "&quot;") : ""}" />
+                 placeholder="Type or select player&hellip;" value="${pick.scorer ? String(pick.scorer).replace(/"/g, "&quot;") : ""}" />
           <datalist id="dl-${f.id}">${dl}</datalist>
         </div>
+        <div class="fixture-done-badge"${done ? "" : ' hidden'}>&#10003; Complete</div>
       </div>`;
     }).join("");
-    markDone();
   }
 
   function isComplete(p) {
@@ -224,7 +230,10 @@
   }
   function markDone() {
     document.querySelectorAll(".fixture").forEach((el) => {
-      el.classList.toggle("done", isComplete(slip[el.dataset.id]));
+      const done = isComplete(slip[el.dataset.id]);
+      el.classList.toggle("done", done);
+      const badge = el.querySelector(".fixture-done-badge");
+      if (badge) badge.hidden = !done;
     });
   }
 
@@ -297,9 +306,11 @@
   function renderLeaderboard() {
     const body = $("#leaderboardBody");
     if (!body) return;
-    body.innerHTML = LEADERBOARD.map((r, i) =>
-      `<tr><td class="lb-rank">${i + 1}</td><td>${r.name}</td><td>${r.exact}</td><td class="num">${r.pts}</td></tr>`
-    ).join("");
+    body.innerHTML = LEADERBOARD.map((r, i) => {
+      const rank = i + 1;
+      const podiumCls = rank <= 3 ? ` class="lb-podium lb-pos-${rank}"` : "";
+      return `<tr${podiumCls}><td class="lb-rank">${rank}</td><td>${r.name}</td><td>${r.exact}</td><td class="num">${r.pts}</td></tr>`;
+    }).join("");
   }
 
   // ============================================================
@@ -343,10 +354,11 @@
     const fixtures = $("#fixtures");
     if (fixtures) {
       fixtures.addEventListener("click", (e) => {
-        const btn = e.target.closest(".stepper button");
+        const btn = e.target.closest(".score-btn");
         if (!btn) return;
         const el = e.target.closest(".fixture");
-        step(el.dataset.id, btn.parentElement.dataset.side, parseInt(btn.dataset.d, 10));
+        const control = btn.closest(".score-control");
+        step(el.dataset.id, control.dataset.side, parseInt(btn.dataset.d, 10));
       });
       fixtures.addEventListener("input", (e) => {
         const inp = e.target.closest(".scorer-input");
@@ -404,6 +416,22 @@
 
     setupReveal();
     updateStatus();
+    initCookieBanner();
+  }
+
+  // ============================================================
+  //  Cookie consent banner
+  // ============================================================
+  function initCookieBanner() {
+    if (localStorage.getItem("s7.cookies")) return;
+    const banner = $("#cookieBanner");
+    if (!banner) return;
+    setTimeout(() => banner.classList.add("visible"), 800);
+    const dismiss = () => banner.classList.remove("visible");
+    const accept = $("#cookieAccept");
+    const essential = $("#cookieEssential");
+    if (accept) accept.addEventListener("click", () => { localStorage.setItem("s7.cookies", "all"); dismiss(); });
+    if (essential) essential.addEventListener("click", () => { localStorage.setItem("s7.cookies", "essential"); dismiss(); });
   }
 
   if (document.readyState === "loading") {

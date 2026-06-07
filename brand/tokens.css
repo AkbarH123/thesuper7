@@ -1,38 +1,51 @@
-/* The Super 7 — Design Tokens
-   Drop this into any page and use the CSS variables below. */
+/* The Super 7 — Design Tokens (OKLCH) */
 
 :root {
-  /* Core palette */
-  --s7-yellow:        #DCE140; /* primary / hero */
-  --s7-yellow-hover:  #E8ED5A;
-  --s7-yellow-deep:   #B7BC2E;
+  /* ── Brand yellow ── */
+  --s7-yellow:       oklch(0.88 0.165 107);
+  --s7-yellow-hover: oklch(0.92 0.14  107);
+  --s7-yellow-deep:  oklch(0.73 0.155 107);
 
-  --s7-charcoal:      #595B5D; /* base surface */
-  --s7-slate:         #6E7072;
-  --s7-graphite:      #3A3B3D;
-  --s7-ink:           #1A1B1D; /* deep surface / text */
+  /* ── Ink surfaces (all tinted toward brand hue) ── */
+  --s7-ink:      oklch(0.13 0.008 95);  /* page background       */
+  --s7-graphite: oklch(0.19 0.007 95);  /* card bg                */
+  --s7-charcoal: oklch(0.23 0.007 95);  /* raised / alt surface   */
+  --s7-slate:    oklch(0.45 0.008 95);  /* disabled / subtle      */
 
-  --s7-silver:        #C7C8CA; /* metallic accent */
-  --s7-offwhite:      #F4F4F2;
-  --s7-white:         #FFFFFF;
+  /* ── Text ── */
+  --s7-offwhite:   oklch(0.96 0.005 95);
+  --s7-silver:     oklch(0.68 0.008 95);
+  --s7-text:       var(--s7-offwhite);
+  --s7-text-muted: var(--s7-silver);
 
-  /* States */
-  --s7-success:       #3FB95B;
-  --s7-error:         #E23B3B;
+  /* ── Borders ── */
+  --s7-border: oklch(0.82 0.006 95 / 0.14);
 
-  /* Semantic */
-  --s7-bg:            var(--s7-ink);
-  --s7-bg-alt:        var(--s7-charcoal);
-  --s7-text:          var(--s7-offwhite);
-  --s7-text-muted:    var(--s7-silver);
-  --s7-accent:        var(--s7-yellow);
-  --s7-border:        rgba(199, 200, 202, 0.18);
+  /* ── States ── */
+  --s7-success: oklch(0.72 0.16 145);
+  --s7-error:   oklch(0.60 0.20  25);
 
-  /* Typography */
-  --s7-font-display:  "Anton", "Archivo", system-ui, sans-serif;
-  --s7-font-body:     "Inter", "Roboto", system-ui, sans-serif;
+  /* ── Semantic aliases (used throughout styles.css) ── */
+  --s7-bg:      var(--s7-ink);
+  --s7-bg-alt:  var(--s7-charcoal);
+  --s7-accent:  var(--s7-yellow);
 
-  /* Radius & shadow */
-  --s7-radius:        10px;
-  --s7-shadow:        0 8px 30px rgba(0, 0, 0, 0.35);
+  /* ── Typography ── */
+  --s7-font-display: "Anton", system-ui, sans-serif;
+  --s7-font-body:    "Barlow", system-ui, sans-serif;
+
+  /* ── 4pt spacing scale ── */
+  --sp-1:   4px;
+  --sp-2:   8px;
+  --sp-3:  12px;
+  --sp-4:  16px;
+  --sp-6:  24px;
+  --sp-8:  32px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+
+  /* ── Radius & shadow ── */
+  --s7-radius:    10px;
+  --s7-radius-lg: 16px;
+  --s7-shadow:    0 8px 30px oklch(0 0 0 / 0.4);
 }

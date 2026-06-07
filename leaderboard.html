@@ -11,7 +11,7 @@
   <link rel="icon" href="brand/assets/logo.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
@@ -35,10 +35,10 @@
             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
           </svg>
         </a>
-        <a href="game.html" class="btn btn-ghost">Play</a>
-        <a href="index.html#notify" class="btn btn-primary">Notify me</a>
+        <a href="#" class="btn btn-ghost">Log in</a>
+        <a href="#" class="btn btn-primary">Sign up</a>
       </div>
-      <button class="menu-toggle" id="menuToggle" aria-label="Menu">☰</button>
+      <button class="menu-toggle" id="menuToggle" aria-label="Menu">&#9776;</button>
     </div>
   </header>
 
@@ -75,6 +75,8 @@
         <a href="leaderboard.html">Leaderboard</a>
         <a href="index.html#faq">FAQ</a>
         <a href="rules.html">Rules &amp; T&amp;Cs</a>
+        <a href="terms.html">Terms</a>
+        <a href="privacy.html">Privacy</a>
       </nav>
       <div class="socials">
         <a class="social" href="https://x.com/_TheSuper7_" target="_blank" rel="noopener" aria-label="The Super 7 on X (Twitter)">
@@ -83,9 +85,23 @@
           </svg>
         </a>
       </div>
-      <p class="footer-legal">© <span id="year"></span> The Super 7. Free to play. 18+. Preview site. Not affiliated with any club or league.</p>
+      <p class="footer-legal">&copy; <span id="year"></span> The Super 7. Free to play. 18+. Not affiliated with any club or league. &middot; <a href="privacy.html">Privacy</a> &middot; <a href="terms.html">Terms</a></p>
     </div>
   </footer>
+
+  <!-- ===== Cookie banner ===== -->
+  <div class="cookie-banner" id="cookieBanner" role="dialog" aria-label="Cookie preferences">
+    <div class="cookie-inner container">
+      <div class="cookie-text">
+        <strong>Cookies &amp; Privacy</strong>
+        <p>We use essential cookies to keep the site working. With your consent we may also use analytics cookies to improve your experience. <a href="privacy.html">Privacy Policy</a></p>
+      </div>
+      <div class="cookie-actions">
+        <button class="btn btn-ghost" id="cookieEssential">Essential only</button>
+        <button class="btn btn-primary" id="cookieAccept">Accept all</button>
+      </div>
+    </div>
+  </div>
 
   <script src="js/app.js"></script>
 </body>
