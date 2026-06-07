@@ -52,6 +52,45 @@
     { id: "demo-6", home: "Tottenham",  away: "Crystal Palace", super7: "Tottenham" },
   ];
 
+  const HISTORY = [
+    {
+      gw: 33, date: "Sat 31 May 2026",
+      results: [
+        { home: "Arsenal",    away: "Newcastle",      score: "3–1", super7: "Arsenal",    scorer: "Saka" },
+        { home: "Brentford",  away: "Chelsea",        score: "1–2", super7: "Chelsea",    scorer: "Palmer" },
+        { home: "Liverpool",  away: "Wolves",         score: "4–0", super7: "Liverpool",  scorer: "Salah" },
+        { home: "Man City",   away: "Fulham",         score: "2–0", super7: "Man City",   scorer: "Haaland" },
+        { home: "Brighton",   away: "Man United",     score: "1–1", super7: "Man United", scorer: "Højlund" },
+        { home: "Newcastle",  away: "Crystal Palace", score: "2–0", super7: "Newcastle",  scorer: "Isak" },
+        { home: "Tottenham",  away: "Everton",        score: "3–0", super7: "Tottenham",  scorer: "Son" },
+      ]
+    },
+    {
+      gw: 32, date: "Sat 24 May 2026",
+      results: [
+        { home: "Arsenal",    away: "Aston Villa",    score: "2–1", super7: "Arsenal",    scorer: "Martinelli" },
+        { home: "Chelsea",    away: "Brighton",       score: "2–0", super7: "Chelsea",    scorer: "Jackson" },
+        { home: "Everton",    away: "Liverpool",      score: "0–3", super7: "Liverpool",  scorer: "Núñez" },
+        { home: "Man City",   away: "Bournemouth",    score: "3–1", super7: "Man City",   scorer: "Foden" },
+        { home: "Man United", away: "Luton",          score: "2–0", super7: "Man United", scorer: "Rashford" },
+        { home: "Newcastle",  away: "Sheffield Utd",  score: "3–0", super7: "Newcastle",  scorer: "Gordon" },
+        { home: "Tottenham",  away: "Burnley",        score: "4–1", super7: "Tottenham",  scorer: "Son" },
+      ]
+    },
+    {
+      gw: 31, date: "Sat 17 May 2026",
+      results: [
+        { home: "Arsenal",    away: "Brentford",      score: "1–0", super7: "Arsenal",    scorer: "Havertz" },
+        { home: "Chelsea",    away: "Nottm Forest",   score: "3–1", super7: "Chelsea",    scorer: "Nkunku" },
+        { home: "Liverpool",  away: "Burnley",        score: "3–0", super7: "Liverpool",  scorer: "Salah" },
+        { home: "Man City",   away: "Leicester",      score: "4–1", super7: "Man City",   scorer: "Doku" },
+        { home: "Man United", away: "West Ham",       score: "2–0", super7: "Man United", scorer: "Garnacho" },
+        { home: "Newcastle",  away: "Ipswich",        score: "3–1", super7: "Newcastle",  scorer: "Isak" },
+        { home: "Tottenham",  away: "Southampton",    score: "4–0", super7: "Tottenham",  scorer: "Son" },
+      ]
+    },
+  ];
+
   const LEADERBOARD = [
     { name: "GoonerGuru",     exact: 6, pts: 38 },
     { name: "KopEndKid",      exact: 5, pts: 34 },
@@ -328,19 +367,59 @@
   }
 
   // ============================================================
+  //  Gameweek history
+  // ============================================================
+  function renderHistory() {
+    const list = $("#gwList");
+    if (!list) return;
+    if (!HISTORY.length) { list.innerHTML = "<p class='demo-note'>No previous results yet.</p>"; return; }
+    list.innerHTML = HISTORY.map((gw) => {
+      const rows = gw.results.map((r) => {
+        const s7code = codeFor(r.super7);
+        const s7club = s7code ? CLUBS[s7code] : null;
+        const accent = s7club ? s7club.bg : "transparent";
+        const textCol = s7club ? s7club.text : "#fff";
+        return `<div class="gw-row" style="--club-accent:${accent}">
+        <div class="gw-match">
+          <div class="gw-team">${badge(r.home)}<span>${r.home}</span></div>
+          <div class="gw-score">${r.score}</div>
+          <div class="gw-team away">${badge(r.away)}<span>${r.away}</span></div>
+        </div>
+        <div class="gw-scorer">
+          <span class="scorer-badge" style="background:${accent};color:${textCol}">${s7code || "?"}</span>
+          First scorer: <strong>${r.scorer}</strong>
+        </div>
+      </div>`;
+      }).join("");
+      return `<details class="gw-week">
+      <summary><span class="gw-label">Gameweek ${gw.gw}</span><span class="gw-date">${gw.date}</span></summary>
+      <div class="gw-results">${rows}</div>
+    </details>`;
+    }).join("");
+  }
+
+  // ============================================================
   //  Reveal on scroll
   // ============================================================
   function setupReveal() {
-    const els = document.querySelectorAll(
-      ".step, .prize, .faq-item, .slip, .table-wrap, .section-title, .section-lead, .cta-inner, .legal-content"
-    );
-    if (!els.length) return;
     const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce || !("IntersectionObserver" in window)) return;
+
+    // Add stagger delay within sibling groups
+    [".step", ".prize", ".faq-item"].forEach((sel) => {
+      document.querySelectorAll(sel).forEach((el, i) => {
+        el.style.transitionDelay = `${i * 0.09}s`;
+      });
+    });
+
+    const els = document.querySelectorAll(
+      ".step, .prize, .faq-item, .slip, .table-wrap, .section-title, .section-lead, .cta-inner, .legal-content, .gw-history"
+    );
+    if (!els.length) return;
     els.forEach((el) => el.classList.add("reveal"));
     const io = new IntersectionObserver((entries) => {
       entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
-    }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+    }, { threshold: 0.1, rootMargin: "0px 0px -30px 0px" });
     els.forEach((el) => io.observe(el));
   }
 
@@ -350,6 +429,7 @@
   function init() {
     renderClubRow();
     renderLeaderboard();
+    renderHistory();
 
     const fixtures = $("#fixtures");
     if (fixtures) {
@@ -370,6 +450,18 @@
         saveSlip();
         markDone();
         updateStatus();
+      });
+      fixtures.addEventListener("focusin", (e) => {
+        const inp = e.target.closest(".scorer-input");
+        if (!inp) return;
+        inp.dataset.prev = inp.value;
+        inp.value = "";
+      });
+      fixtures.addEventListener("focusout", (e) => {
+        const inp = e.target.closest(".scorer-input");
+        if (!inp) return;
+        if (!inp.value.trim()) inp.value = inp.dataset.prev || "";
+        delete inp.dataset.prev;
       });
       loadFixtures();
     }
