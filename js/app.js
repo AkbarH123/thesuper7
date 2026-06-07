@@ -10,13 +10,13 @@
 
   // ---- The Super 7 clubs (home colour schemes) ----
   const CLUBS = {
-    ARS: { name: "Arsenal",    bg: "#EF0107", text: "#FFFFFF", border: "#DAA520" },
-    CHE: { name: "Chelsea",    bg: "#034694", text: "#FFFFFF", border: "#FFFFFF" },
-    LIV: { name: "Liverpool",  bg: "#C8102E", text: "#F6EB61", border: "#F6EB61" },
-    MCI: { name: "Man City",   bg: "#6CABDD", text: "#1C2C5B", border: "#1C2C5B" },
-    MUN: { name: "Man United", bg: "#DA291C", text: "#FFFFFF", border: "#000000" },
-    NEW: { name: "Newcastle",  bg: "#000000", text: "#FFFFFF", border: "#41B6E6", stripe: true },
-    TOT: { name: "Tottenham",  bg: "#FFFFFF", text: "#132257", border: "#132257" },
+    ARS: { name: "Arsenal",    bg: "#EF0107", text: "#FFFFFF", border: "#DAA520", form: ["W","W","D","W","L"] },
+    CHE: { name: "Chelsea",    bg: "#034694", text: "#FFFFFF", border: "#FFFFFF", form: ["W","D","W","L","W"] },
+    LIV: { name: "Liverpool",  bg: "#C8102E", text: "#F6EB61", border: "#F6EB61", form: ["W","W","W","D","W"] },
+    MCI: { name: "Man City",   bg: "#6CABDD", text: "#1C2C5B", border: "#1C2C5B", form: ["W","W","L","W","W"] },
+    MUN: { name: "Man United", bg: "#DA291C", text: "#FFFFFF", border: "#000000", form: ["D","L","W","D","L"] },
+    NEW: { name: "Newcastle",  bg: "#000000", text: "#FFFFFF", border: "#41B6E6", stripe: true, form: ["W","D","W","W","D"] },
+    TOT: { name: "Tottenham",  bg: "#FFFFFF", text: "#132257", border: "#132257", form: ["L","W","D","L","W"] },
   };
 
   // Map various team-name spellings (from the API) to our club codes.
@@ -166,8 +166,12 @@
         ? `<span class="name-chip" style="border-color:${c.border}">${c.name}</span>`
         : c.name;
       const nameStyle = c.stripe ? "" : `color:${c.text}`;
+      const formDots = (c.form || []).map((r) =>
+        `<span class="form-dot form-dot-${r}" title="${r === "W" ? "Win" : r === "D" ? "Draw" : "Loss"}"></span>`
+      ).join("");
+      const formGuide = formDots ? `<div class="form-guide" aria-label="Recent form">${formDots}</div>` : "";
       return `<div class="shield" title="${c.name}">${body}` +
-        `<span class="shield-name" style="${nameStyle}">${nameInner}</span></div>`;
+        `<span class="shield-name" style="${nameStyle}">${nameInner}</span>${formGuide}</div>`;
     }).join("");
   }
 
@@ -429,7 +433,7 @@
     });
 
     const els = document.querySelectorAll(
-      ".step, .prize, .faq-item, .slip, .table-wrap, .section-title, .section-lead, .section-cta, .cta-inner, .legal-content, .gw-history, .clubs-strip"
+      ".step, .prize, .faq-item, .slip, .table-wrap, .section-title, .section-lead, .section-cta, .cta-inner, .legal-content, .gw-history, .clubs-strip, .stat-block, .pundit-layout, .stories-grid, .story-card, .origin-layout, .season-stats"
     );
     if (!els.length) return;
     els.forEach((el) => el.classList.add("reveal"));
