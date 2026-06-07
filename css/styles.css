@@ -120,7 +120,7 @@ img { max-width: 100%; display: block; }
 }
 .nav a:hover { color: var(--s7-yellow); }
 
-.header-actions { display: flex; gap: var(--sp-2); }
+.header-actions { display: flex; gap: var(--sp-2); align-items: center; }
 .menu-toggle {
   display: none;
   background: none;
@@ -138,15 +138,22 @@ img { max-width: 100%; display: block; }
   position: relative;
   padding: 3.5rem 0 3.5rem;
   overflow: hidden;
+  animation: s7-hero-breathe 10s ease-in-out infinite;
 }
 
 .hero-bg {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background:
-    radial-gradient(600px 500px at 85% 60%,
-      oklch(0.88 0.165 107 / 0.09), transparent 60%);
+  overflow: hidden;
+  /* subtle horizontal scanlines — broadcast texture */
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    oklch(0.96 0.005 95 / 0.022) 3px,
+    oklch(0.96 0.005 95 / 0.022) 4px
+  );
 }
 
 .hero-inner {
@@ -938,12 +945,23 @@ img { max-width: 100%; display: block; }
    Motion & animations
    ============================================================ */
 @keyframes s7-floatA {
-  0%, 100% { transform: translate(0, 0); }
-  50%       { transform: translate(36px, 26px); }
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  30%       { transform: translate(-55px, 40px) scale(1.07); }
+  65%       { transform: translate(28px, -22px) scale(0.95); }
 }
 @keyframes s7-floatB {
-  0%, 100% { transform: translate(0, 0); }
-  50%       { transform: translate(-42px, 18px); }
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  35%       { transform: translate(60px, -32px) scale(1.05); }
+  70%       { transform: translate(-25px, 35px) scale(0.97); }
+}
+@keyframes s7-floatC {
+  0%, 100% { transform: translateX(-50%) scaleX(1) scaleY(1); }
+  38%       { transform: translateX(-50%) scaleX(1.14) scaleY(0.88); }
+  72%       { transform: translateX(-50%) scaleX(0.93) scaleY(1.1); }
+}
+@keyframes s7-hero-breathe {
+  0%, 100% { background-color: var(--s7-ink); }
+  50%       { background-color: oklch(0.155 0.008 95); }
 }
 @keyframes s7-pop {
   from { opacity: 0; transform: translateY(14px) scale(0.95); }
@@ -955,28 +973,44 @@ img { max-width: 100%; display: block; }
   position: absolute;
   pointer-events: none;
   z-index: 0;
-  width: 480px;
-  height: 480px;
-  top: -140px;
-  right: -100px;
+  width: 720px;
+  height: 720px;
+  top: -240px;
+  right: -180px;
   border-radius: 50%;
-  background: radial-gradient(circle, oklch(0.88 0.165 107 / 0.18), transparent 65%);
-  filter: blur(8px);
-  animation: s7-floatA 16s ease-in-out infinite;
+  background: radial-gradient(circle, oklch(0.88 0.165 107 / 0.24) 0%, transparent 65%);
+  filter: blur(55px);
+  animation: s7-floatA 20s ease-in-out infinite;
 }
 .hero-bg::before {
   content: "";
   position: absolute;
   pointer-events: none;
   z-index: 0;
-  width: 400px;
-  height: 400px;
-  bottom: -120px;
-  left: -80px;
+  width: 560px;
+  height: 560px;
+  bottom: -160px;
+  left: -110px;
   border-radius: 50%;
-  background: radial-gradient(circle, oklch(0.62 0.12 240 / 0.12), transparent 65%);
-  filter: blur(8px);
-  animation: s7-floatB 20s ease-in-out infinite;
+  background: radial-gradient(circle, oklch(0.72 0.14 75 / 0.16) 0%, transparent 65%);
+  filter: blur(48px);
+  animation: s7-floatB 28s ease-in-out infinite;
+}
+/* Third orb — wide soft yellow ellipse, bottom centre */
+.hero-bg::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  width: 1100px;
+  height: 360px;
+  bottom: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, oklch(0.88 0.165 107 / 0.07) 0%, transparent 65%);
+  filter: blur(64px);
+  animation: s7-floatC 32s ease-in-out infinite;
 }
 
 /* Shield entrance stagger */
@@ -1126,37 +1160,57 @@ img { max-width: 100%; display: block; }
   .play-head { flex-direction: column; align-items: flex-start; }
   .deadline { text-align: left; }
   .club-row { grid-template-columns: repeat(4, 1fr); max-width: 520px; }
-  .hero-foot { flex-direction: column; align-items: flex-start; }
-  .jackpot { flex-direction: row; align-items: baseline; gap: var(--sp-3); }
+  .hero-foot { flex-direction: column; align-items: flex-start; gap: var(--sp-6); }
+  .jackpot { flex-direction: row; align-items: baseline; gap: var(--sp-3); flex-wrap: wrap; }
 }
 
 @media (max-width: 560px) {
+  /* Header */
   .header-inner { gap: var(--sp-3); }
   .brand-mark { height: 44px; }
-  .hero { padding: 2.5rem 0 2.5rem; }
+
+  /* Hero */
+  .hero { padding: 2rem 0 2.5rem; }
+  .hero-inner { text-align: center; }
   .ht-outline { -webkit-text-stroke-width: 1.5px; }
+  .hero-foot { align-items: center; }
+  .hero-foot-text { align-items: center; width: 100%; }
+  .hero-sub { text-align: center; }
+  .hero-cta { flex-direction: column; width: 100%; }
+  .hero-cta .btn { width: 100%; text-align: center; }
+  .notify { flex-direction: column; width: 100%; }
+  .notify-input, .notify .btn { width: 100%; }
+  .jackpot { flex-direction: column; gap: var(--sp-1); text-align: center; align-items: center; }
+  .club-row { grid-template-columns: repeat(3, 1fr); justify-items: center; }
+  .shield-name { font-size: 0.8rem; padding-bottom: 24%; }
+
+  /* Sections */
+  .section { padding: 3rem 0; }
   .steps, .prizes { grid-template-columns: 1fr; }
   .prize-feature { flex-direction: column; align-items: flex-start; gap: var(--sp-4); padding: var(--sp-6); }
   .prize-feature .prize-amount { font-size: clamp(2.5rem, 8vw, 3.5rem); }
+  .cta-inner { flex-direction: column; text-align: center; }
+  .cta-inner .btn { width: 100%; }
+
+  /* Game slip */
   .fixture { padding: var(--sp-4) var(--sp-3); }
   .fixture-main { gap: var(--sp-2); }
   .scorer-input { min-width: 0; flex: 1 1 100%; }
+  .fixture-scorer { flex-wrap: wrap; }
   .fixture-scorer label { font-size: 0.7rem; }
   .team { gap: var(--sp-2); }
   .team-name { font-size: 0.78rem; }
   .team-badge { width: 30px; height: 30px; font-size: 0.55rem; }
   .score-val { font-size: 1.8rem; }
   .score-btn { width: 34px; height: 34px; }
-  .club-row { grid-template-columns: repeat(3, 1fr); }
-  .shield-name { font-size: 0.8rem; padding-bottom: 24%; }
-  .notify { flex-direction: column; }
-  .notify-input, .notify .btn { width: 100%; }
-  .btn-lg { width: 100%; }
-  .hero-cta { flex-direction: column; }
-  .jackpot { flex-direction: column; gap: var(--sp-1); }
-  .cta-inner { flex-direction: column; text-align: center; }
-  .section { padding: 3.5rem 0; }
-  .cookie-inner { flex-direction: column; align-items: stretch; }
-  .cookie-actions { flex-direction: row; }
-  .cookie-actions .btn { flex: 1; }
+  .slip-actions { flex-direction: column; gap: var(--sp-2); }
+  .slip-actions .btn { width: 100%; }
+
+  /* Cookie banner — compact */
+  .cookie-inner { flex-direction: column; align-items: stretch; gap: var(--sp-3); padding: var(--sp-3) 0; }
+  .cookie-text { font-size: 0.82rem; }
+  .cookie-text strong { font-size: 0.88rem; margin-bottom: 0.15rem; }
+  .cookie-text p { font-size: 0.8rem; line-height: 1.4; }
+  .cookie-actions { flex-direction: row; gap: var(--sp-2); }
+  .cookie-actions .btn { flex: 1; padding: 0.6rem 0.8rem; font-size: 0.88rem; }
 }
