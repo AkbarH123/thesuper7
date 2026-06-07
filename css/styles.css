@@ -173,18 +173,15 @@ img { max-width: 100%; display: block; }
   -webkit-text-stroke: 2px var(--s7-offwhite);
   line-height: 1.1;
 }
-.ht-solid {
+.ht-main {
+  display: block;
   font-family: var(--s7-font-display);
   font-size: clamp(4.5rem, 22vw, 18rem);
-  color: var(--s7-offwhite);
   line-height: 0.87;
+  white-space: nowrap;
 }
-.ht-accent {
-  font-family: var(--s7-font-display);
-  font-size: clamp(5.5rem, 28vw, 22rem);
-  color: var(--s7-yellow);
-  line-height: 0.87;
-}
+.ht-solid { color: var(--s7-offwhite); }
+.ht-accent { color: var(--s7-yellow); }
 
 /* Hero footer: copy left, jackpot right */
 .hero-foot {
