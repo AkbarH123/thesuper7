@@ -146,7 +146,20 @@ img { max-width: 100%; display: block; }
   inset: 0;
   z-index: 0;
   overflow: hidden;
-  /* subtle horizontal scanlines — broadcast texture */
+}
+/* Stadium photo — greyscale, darkened, behind all effects */
+.hero-bg > .hero-stadium {
+  position: absolute;
+  inset: 0;
+  background: url("../brand/assets/stadium.jpg") center 30% / cover no-repeat;
+  filter: grayscale(1) brightness(0.28);
+  z-index: 0;
+}
+/* Scanlines on top of the photo */
+.hero-bg > .hero-scanlines {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
   background-image: repeating-linear-gradient(
     0deg,
     transparent,
@@ -154,6 +167,7 @@ img { max-width: 100%; display: block; }
     oklch(0.96 0.005 95 / 0.022) 3px,
     oklch(0.96 0.005 95 / 0.022) 4px
   );
+  pointer-events: none;
 }
 
 .hero-inner {
@@ -986,7 +1000,7 @@ img { max-width: 100%; display: block; }
   content: "";
   position: absolute;
   pointer-events: none;
-  z-index: 0;
+  z-index: 2;
   width: 560px;
   height: 560px;
   bottom: -160px;
@@ -1001,7 +1015,7 @@ img { max-width: 100%; display: block; }
   content: "";
   position: absolute;
   pointer-events: none;
-  z-index: 0;
+  z-index: 2;
   width: 1100px;
   height: 360px;
   bottom: -60px;
