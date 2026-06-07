@@ -10,13 +10,13 @@
 
   // ---- The Super 7 clubs (home colour schemes) ----
   const CLUBS = {
-    ARS: { name: "Arsenal",    bg: "#EF0107", text: "#FFFFFF", border: "#DAA520" },
-    CHE: { name: "Chelsea",    bg: "#034694", text: "#FFFFFF", border: "#FFFFFF" },
-    LIV: { name: "Liverpool",  bg: "#C8102E", text: "#F6EB61", border: "#F6EB61" },
-    MCI: { name: "Man City",   bg: "#6CABDD", text: "#1C2C5B", border: "#1C2C5B" },
-    MUN: { name: "Man United", bg: "#DA291C", text: "#FFFFFF", border: "#000000" },
-    NEW: { name: "Newcastle",  bg: "#000000", text: "#FFFFFF", border: "#41B6E6", stripe: true },
-    TOT: { name: "Tottenham",  bg: "#FFFFFF", text: "#132257", border: "#132257" },
+    ARS: { name: "Arsenal",    bg: "#EF0107", text: "#FFFFFF", border: "#DAA520", form: ["W","W","D","W","L"] },
+    CHE: { name: "Chelsea",    bg: "#034694", text: "#FFFFFF", border: "#FFFFFF", form: ["W","D","W","L","W"] },
+    LIV: { name: "Liverpool",  bg: "#C8102E", text: "#F6EB61", border: "#F6EB61", form: ["W","W","W","D","W"] },
+    MCI: { name: "Man City",   bg: "#6CABDD", text: "#1C2C5B", border: "#1C2C5B", form: ["W","W","L","W","W"] },
+    MUN: { name: "Man United", bg: "#DA291C", text: "#FFFFFF", border: "#000000", form: ["D","L","W","D","L"] },
+    NEW: { name: "Newcastle",  bg: "#000000", text: "#FFFFFF", border: "#41B6E6", stripe: true, form: ["W","D","W","W","D"] },
+    TOT: { name: "Tottenham",  bg: "#FFFFFF", text: "#132257", border: "#132257", form: ["L","W","D","L","W"] },
   };
 
   // Map various team-name spellings (from the API) to our club codes.
@@ -50,6 +50,28 @@
     { id: "demo-4", home: "Fulham",     away: "Man United",     super7: "Man United" },
     { id: "demo-5", home: "Newcastle",  away: "Brentford",      super7: "Newcastle" },
     { id: "demo-6", home: "Tottenham",  away: "Crystal Palace", super7: "Tottenham" },
+  ];
+
+  // Form guides and H2H metadata keyed by club code
+  const FIXTURE_META = {
+    "ARS": { form: ["W","W","D","W","L"], h2h_vs: { "CHE": "Arsenal won 3 of the last 5 H2H", "NEW": "Last 5: ARS 3W 1D 1L" } },
+    "CHE": { form: ["W","D","W","L","W"], h2h_vs: { "ARS": "Chelsea won 2 of the last 5 H2H", "BHA": "Last 5: CHE 2W 2D 1L" } },
+    "LIV": { form: ["W","W","W","D","W"], h2h_vs: { "MCI": "Liverpool won 3 of the last 5 H2H", "WOL": "Last 5: LIV 4W 1D 0L" } },
+    "MCI": { form: ["W","W","L","W","W"], h2h_vs: { "LIV": "Man City won 2 of the last 5 H2H", "FUL": "Last 5: MCI 4W 1D 0L" } },
+    "MUN": { form: ["D","L","W","D","L"], h2h_vs: { "TOT": "Last 5: even split", "BHA": "Last 5: MUN 2W 1D 2L" } },
+    "NEW": { form: ["W","D","W","W","D"], h2h_vs: { "ARS": "Newcastle won 1 of last 5 H2H", "CRY": "Last 5: NEW 3W 1D 1L" } },
+    "TOT": { form: ["L","W","D","L","W"], h2h_vs: { "MUN": "Spurs won 2 of last 5 H2H", "EVE": "Last 5: TOT 4W 0D 1L" } },
+  };
+
+  // Demo data for most popular predictions
+  const POPULAR = [
+    { fixture: "Arsenal vs Chelsea",      picks: [{ score: "2–1", pct: 34 }, { score: "1–0", pct: 21 }] },
+    { fixture: "Brentford vs Chelsea",    picks: [{ score: "1–1", pct: 28 }, { score: "0–1", pct: 24 }] },
+    { fixture: "Liverpool vs Wolves",     picks: [{ score: "3–0", pct: 42 }, { score: "2–0", pct: 31 }] },
+    { fixture: "Man City vs Fulham",      picks: [{ score: "2–0", pct: 38 }, { score: "3–0", pct: 26 }] },
+    { fixture: "Brighton vs Man United",  picks: [{ score: "1–1", pct: 29 }, { score: "1–0", pct: 22 }] },
+    { fixture: "Newcastle vs Crystal Pal",picks: [{ score: "2–0", pct: 36 }, { score: "1–0", pct: 28 }] },
+    { fixture: "Tottenham vs Everton",    picks: [{ score: "2–0", pct: 41 }, { score: "1–0", pct: 29 }] },
   ];
 
   const HISTORY = [
@@ -166,8 +188,12 @@
         ? `<span class="name-chip" style="border-color:${c.border}">${c.name}</span>`
         : c.name;
       const nameStyle = c.stripe ? "" : `color:${c.text}`;
+      const formDots = (c.form || []).map((r) =>
+        `<span class="form-dot form-dot-${r}" title="${r === "W" ? "Win" : r === "D" ? "Draw" : "Loss"}"></span>`
+      ).join("");
+      const formGuide = formDots ? `<div class="form-guide" aria-label="Recent form">${formDots}</div>` : "";
       return `<div class="shield" title="${c.name}">${body}` +
-        `<span class="shield-name" style="${nameStyle}">${nameInner}</span></div>`;
+        `<span class="shield-name" style="${nameStyle}">${nameInner}</span>${formGuide}</div>`;
     }).join("");
   }
 
@@ -209,6 +235,11 @@
     } catch (e) { return f.date; }
   }
 
+  function formDotsHTML(form) {
+    if (!Array.isArray(form)) return "";
+    return form.map((r) => `<span class="fdot fdot-${r.toLowerCase()}"></span>`).join("");
+  }
+
   function renderFixtures() {
     const wrap = $("#fixtures");
     if (!wrap) return;
@@ -224,6 +255,15 @@
         .map((p) => `<option value="${p}"></option>`).join("");
       const when = fixtureDateLabel(f);
       const done = isComplete(pick);
+      const homeCode = codeFor(f.home);
+      const awayCode = codeFor(f.away);
+      const homeMeta = homeCode ? FIXTURE_META[homeCode] : null;
+      const awayMeta = awayCode ? FIXTURE_META[awayCode] : null;
+      const h2hText = (homeMeta && homeMeta.h2h_vs && awayCode && homeMeta.h2h_vs[awayCode])
+        ? homeMeta.h2h_vs[awayCode]
+        : (awayMeta && awayMeta.h2h_vs && homeCode && awayMeta.h2h_vs[homeCode])
+          ? awayMeta.h2h_vs[homeCode]
+          : null;
       return `
       <div class="fixture${done ? " done" : ""}" data-id="${f.id}" style="--club-accent:${clubAccent};animation-delay:${i * 0.07}s">
         ${when ? `<div class="fixture-date">${when}</div>` : ""}
@@ -258,6 +298,19 @@
           <input class="scorer-input" id="scorer-${f.id}" data-id="${f.id}" list="dl-${f.id}"
                  placeholder="Type or select player&hellip;" value="${pick.scorer ? String(pick.scorer).replace(/"/g, "&quot;") : ""}" />
           <datalist id="dl-${f.id}">${dl}</datalist>
+        </div>
+        <div class="fixture-meta">
+          <div class="fixture-forms">
+            <div class="form-track">
+              <span class="form-team-name">${homeCode || f.home.slice(0, 3).toUpperCase()}</span>
+              ${formDotsHTML(homeMeta ? homeMeta.form : null)}
+            </div>
+            <div class="form-track">
+              <span class="form-team-name">${awayCode || f.away.slice(0, 3).toUpperCase()}</span>
+              ${formDotsHTML(awayMeta ? awayMeta.form : null)}
+            </div>
+          </div>
+          ${h2hText ? `<div class="fixture-h2h">${h2hText}</div>` : ""}
         </div>
         <div class="fixture-done-badge"${done ? "" : ' hidden'}>&#10003; Complete</div>
       </div>`;
@@ -429,7 +482,7 @@
     });
 
     const els = document.querySelectorAll(
-      ".step, .prize, .faq-item, .slip, .table-wrap, .section-title, .section-lead, .section-cta, .cta-inner, .legal-content, .gw-history, .clubs-strip"
+      ".step, .prize, .faq-item, .slip, .table-wrap, .section-title, .section-lead, .section-cta, .cta-inner, .legal-content, .gw-history, .clubs-strip, .stat-block, .pundit-layout, .stories-grid, .story-card, .origin-layout, .season-stats"
     );
     if (!els.length) return;
     els.forEach((el) => el.classList.add("reveal"));
@@ -446,10 +499,34 @@
   // ============================================================
   //  Init
   // ============================================================
+  // ============================================================
+  //  Popular picks
+  // ============================================================
+  function renderPopularPicks() {
+    const grid = $("#popularGrid");
+    if (!grid) return;
+    grid.innerHTML = POPULAR.map((item) => {
+      const rows = item.picks.map((p) => `
+        <div class="pop-row">
+          <span class="pop-score">${p.score}</span>
+          <div class="pop-bar-wrap">
+            <div class="pop-bar" style="width:${p.pct}%"></div>
+          </div>
+          <span class="pop-pct">${p.pct}%</span>
+        </div>`).join("");
+      return `
+        <div class="pop-card">
+          <div class="pop-fixture">${item.fixture}</div>
+          ${rows}
+        </div>`;
+    }).join("");
+  }
+
   function init() {
     renderClubRow();
     renderLeaderboard();
     renderHistory();
+    renderPopularPicks();
 
     const fixtures = $("#fixtures");
     if (fixtures) {
@@ -500,6 +577,33 @@
     if (modalClose) modalClose.addEventListener("click", closeModal);
     const modal = $("#modal");
     if (modal) modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+
+    const shareBtn = $("#shareBtn");
+    if (shareBtn) shareBtn.addEventListener("click", () => {
+      const lines = ["My Super 7 predictions for GW34:"];
+      FIXTURES.forEach((f) => {
+        const p = slip[f.id] || {};
+        const h = Number.isInteger(p.h) ? p.h : 0;
+        const a = Number.isInteger(p.a) ? p.a : 0;
+        lines.push(`${f.home} ${h}–${a} ${f.away}`);
+      });
+      const scorerLines = FIXTURES
+        .map((f) => { const p = slip[f.id] || {}; return p.scorer ? `${f.super7 || f.home}: ${p.scorer}` : null; })
+        .filter(Boolean);
+      if (scorerLines.length) lines.push("First scorers: " + scorerLines.join(", "));
+      lines.push("Can you beat me? thesuper7.com");
+      const text = lines.join("\n");
+      const originalText = shareBtn.textContent;
+      const showCopied = () => {
+        shareBtn.textContent = "✓ Copied to clipboard";
+        setTimeout(() => { shareBtn.textContent = originalText; }, 2000);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(showCopied).catch(() => { prompt("Copy your predictions:", text); });
+      } else {
+        prompt("Copy your predictions:", text);
+      }
+    });
 
     // FAQ open/close animation
     document.querySelectorAll(".faq-item").forEach((details) => {
