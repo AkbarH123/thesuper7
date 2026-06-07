@@ -153,6 +153,8 @@ img { max-width: 100%; display: block; }
   inset: 0;
   background: url("../brand/assets/stadium.jpg") center 30% / cover no-repeat;
   filter: grayscale(1) brightness(0.28);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 100%);
   z-index: 0;
 }
 /* Scanlines on top of the photo */
