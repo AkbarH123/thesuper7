@@ -348,6 +348,7 @@
       const ss = Math.floor(diff / 1000);
       const pad = (n) => String(n).padStart(2, "0");
       el.textContent = (dd > 0 ? dd + "d " : "") + `${pad(hh)}:${pad(mm)}:${pad(ss)}`;
+      el.classList.toggle("urgent", diff > 0 && diff < 3600000);
     };
     tick();
     if (countdownTimer) clearInterval(countdownTimer);
@@ -428,10 +429,14 @@
     });
 
     const els = document.querySelectorAll(
-      ".step, .prize, .faq-item, .slip, .table-wrap, .section-title, .section-lead, .cta-inner, .legal-content, .gw-history, .clubs-strip"
+      ".step, .prize, .faq-item, .slip, .table-wrap, .section-title, .section-lead, .section-cta, .cta-inner, .legal-content, .gw-history, .clubs-strip"
     );
     if (!els.length) return;
     els.forEach((el) => el.classList.add("reveal"));
+    // Page-top elements use CSS animation — remove reveal to avoid opacity conflict
+    document.querySelectorAll(
+      ".page-top .section-title, .page-top .section-lead, .page-top .deadline, .page-top .slip, .page-top .table-wrap, .page-top .demo-note"
+    ).forEach((el) => el.classList.remove("reveal"));
     const io = new IntersectionObserver((entries) => {
       entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
     }, { threshold: 0.1, rootMargin: "0px 0px -30px 0px" });

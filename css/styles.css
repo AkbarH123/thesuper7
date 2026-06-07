@@ -896,9 +896,17 @@ img { max-width: 100%; display: block; }
   background: oklch(0.88 0.165 107 / 0.04);
 }
 /* Top 3 ranks */
-.leaderboard tbody tr:nth-child(1) td:first-child { color: var(--s7-yellow); }
+.leaderboard tbody tr:nth-child(1) td:first-child { color: var(--s7-yellow); font-size: 1.6rem; }
 .leaderboard tbody tr:nth-child(2) td:first-child { color: oklch(0.82 0.006 95); }
 .leaderboard tbody tr:nth-child(3) td:first-child { color: oklch(0.65 0.09 55); }
+/* Podium rows get a stronger pop */
+@keyframes s7-podium-in {
+  from { opacity: 0; transform: translateX(-12px) scale(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+.leaderboard tbody tr:nth-child(1) { animation-name: s7-podium-in; animation-duration: 0.55s; }
+.leaderboard tbody tr:nth-child(2) { animation-name: s7-podium-in; }
+.leaderboard tbody tr:nth-child(3) { animation-name: s7-podium-in; }
 .leaderboard .num { text-align: right; }
 .leaderboard td.num {
   font: 400 1.4rem/1 var(--s7-font-display);
@@ -1115,6 +1123,24 @@ img { max-width: 100%; display: block; }
 .ht-main      { animation: s7-slide-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: 0.22s; }
 .hero-foot-text { animation: s7-slide-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: 0.36s; }
 .jackpot      { animation: s7-jackpot-in 0.85s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: 0.52s; }
+
+/* Page-top entrance — game + leaderboard (above fold, CSS-driven not scroll reveal) */
+.page-top .section-title  { animation: s7-slide-in 0.7s  cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: 0.06s; }
+.page-top .section-lead   { animation: s7-fade-up  0.6s  cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: 0.18s; }
+.page-top .deadline       { animation: s7-fade-up  0.6s  cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: 0.24s; }
+.page-top .slip           { animation: s7-fade-up  0.65s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: 0.3s;  }
+.page-top .table-wrap     { animation: s7-fade-up  0.65s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: 0.3s;  }
+.page-top .demo-note      { animation: s7-fade-up  0.5s  cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: 0.42s; }
+
+/* Deadline urgent state */
+@keyframes s7-timer-urgent {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+.deadline-timer.urgent {
+  color: oklch(0.72 0.2 25);
+  animation: s7-timer-urgent 1s ease-in-out infinite;
+}
 
 /* Notify success reveal */
 .notify-msg:not([hidden]) {
