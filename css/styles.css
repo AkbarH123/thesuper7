@@ -115,10 +115,27 @@ img { max-width: 100%; display: block; }
   font-size: 0.9rem;
 }
 .nav a {
+  position: relative;
   color: var(--s7-text-muted);
-  transition: color 0.15s;
+  transition: color 0.2s;
+}
+.nav a::after {
+  content: "";
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  background: var(--s7-yellow);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .nav a:hover { color: var(--s7-yellow); }
+.nav a:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
 
 .header-actions { display: flex; gap: var(--sp-2); align-items: center; }
 .menu-toggle {
@@ -430,11 +447,14 @@ img { max-width: 100%; display: block; }
   border: 1px solid var(--s7-border);
   border-radius: var(--s7-radius-lg);
   padding: var(--sp-10, 40px) var(--sp-8);
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.2s ease,
+              box-shadow 0.25s ease;
 }
 .prize:hover {
-  transform: translateY(-5px);
-  border-color: oklch(0.82 0.006 95 / 0.35);
+  transform: translateY(-6px);
+  border-color: oklch(0.82 0.006 95 / 0.4);
+  box-shadow: 0 20px 48px oklch(0 0 0 / 0.35);
 }
 .prize-amount {
   font: 400 clamp(2.4rem, 5vw, 3rem)/1 var(--s7-font-display);
@@ -560,6 +580,7 @@ img { max-width: 100%; display: block; }
   flex-wrap: wrap;
   justify-content: center;
 }
+.footer-nav a { transition: color 0.18s; }
 .footer-nav a:hover { color: var(--s7-yellow); }
 .footer-legal {
   color: var(--s7-slate);
@@ -774,6 +795,8 @@ img { max-width: 100%; display: block; }
 .scorer-input:focus {
   outline: none;
   border-color: var(--s7-yellow);
+  box-shadow: 0 0 0 3px oklch(0.88 0.165 107 / 0.18);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 /* Done badge */
@@ -931,8 +954,13 @@ img { max-width: 100%; display: block; }
   font-size: 0.9rem;
   margin-bottom: var(--sp-6);
 }
-.back-link::before { content: "←"; }
+.back-link::before {
+  content: "←";
+  display: inline-block;
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
 .back-link:hover { color: var(--s7-yellow); }
+.back-link:hover::before { transform: translateX(-4px); }
 
 /* ============================================================
    Modal
@@ -1056,8 +1084,9 @@ img { max-width: 100%; display: block; }
 /* Scroll reveal */
 .reveal {
   opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1), transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateY(18px);
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .reveal.in { opacity: 1; transform: none; }
 
@@ -1091,6 +1120,36 @@ img { max-width: 100%; display: block; }
 .notify-msg:not([hidden]) {
   animation: s7-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+
+/* Score value pulse on change */
+@keyframes s7-score-pulse {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.28); }
+  100% { transform: scale(1); }
+}
+.score-val.pulse { animation: s7-score-pulse 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+
+/* Submit button ready flash */
+@keyframes s7-btn-ready {
+  0%   { transform: translateY(-2px) scale(1.04); }
+  100% { transform: none; }
+}
+.btn.ready-pulse { animation: s7-btn-ready 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+
+/* Fixture row entrance */
+.fixture { animation: s7-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* Modal backdrop + card entrance */
+@keyframes s7-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes s7-modal-in {
+  from { opacity: 0; transform: scale(0.88) translateY(20px); }
+  to   { opacity: 1; transform: none; }
+}
+.modal.open { animation: s7-backdrop-in 0.2s ease both; }
+.modal.open .modal-card { animation: s7-modal-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
 /* ============================================================
    Gameweek history

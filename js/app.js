@@ -212,7 +212,7 @@
   function renderFixtures() {
     const wrap = $("#fixtures");
     if (!wrap) return;
-    wrap.innerHTML = FIXTURES.map((f) => {
+    wrap.innerHTML = FIXTURES.map((f, i) => {
       const s7code = codeFor(f.super7) || codeFor(f.home) || codeFor(f.away);
       const s7club = s7code ? CLUBS[s7code] : null;
       const s7name = (s7club && s7club.name) || f.super7 || f.home;
@@ -225,7 +225,7 @@
       const when = fixtureDateLabel(f);
       const done = isComplete(pick);
       return `
-      <div class="fixture${done ? " done" : ""}" data-id="${f.id}" style="--club-accent:${clubAccent}">
+      <div class="fixture${done ? " done" : ""}" data-id="${f.id}" style="--club-accent:${clubAccent};animation-delay:${i * 0.07}s">
         ${when ? `<div class="fixture-date">${when}</div>` : ""}
         <div class="fixture-main">
           <div class="team home">
@@ -276,6 +276,13 @@
     });
   }
 
+  function pulseEl(el) {
+    el.classList.remove("pulse");
+    void el.offsetWidth;
+    el.classList.add("pulse");
+    el.addEventListener("animationend", () => el.classList.remove("pulse"), { once: true });
+  }
+
   function step(id, side, delta) {
     const p = slip[id] || {};
     let v = Number.isInteger(p[side]) ? p[side] : 0;
@@ -284,7 +291,11 @@
     slip[id] = p;
     saveSlip();
     const el = document.querySelector(`.fixture[data-id="${id}"]`);
-    if (el) el.querySelector(`.score-val[data-side="${side}"]`).textContent = v;
+    if (el) {
+      const valEl = el.querySelector(`.score-val[data-side="${side}"]`);
+      valEl.textContent = v;
+      pulseEl(valEl);
+    }
     markDone();
     updateStatus();
   }
@@ -303,7 +314,11 @@
         (n < total ? ", add scores and first scorers" : ", ready to submit");
       status.classList.toggle("ready", n === total && total > 0);
     }
-    if (submit) submit.disabled = !(n === total && total > 0);
+    if (submit) {
+      const wasDisabled = submit.disabled;
+      submit.disabled = !(n === total && total > 0);
+      if (wasDisabled && !submit.disabled) pulseEl(submit);
+    }
   }
 
   // ---- countdown to the first fixture (or next Saturday 3pm) ----
