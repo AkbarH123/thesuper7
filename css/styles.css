@@ -265,6 +265,8 @@ img { max-width: 100%; display: block; }
 .notify-input:focus {
   outline: none;
   border-color: var(--s7-yellow);
+  box-shadow: 0 0 0 3px oklch(0.88 0.165 107 / 0.18);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .notify-msg {
   color: var(--s7-yellow);
@@ -865,6 +867,7 @@ img { max-width: 100%; display: block; }
 .leaderboard tbody tr {
   border-top: 1px solid var(--s7-border);
   transition: background 0.15s;
+  animation: s7-fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .leaderboard tbody tr:hover {
   background: oklch(0.88 0.165 107 / 0.04);
@@ -1068,9 +1071,26 @@ img { max-width: 100%; display: block; }
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: none; }
 }
-.ht-outline { animation: s7-slide-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: 0.05s; }
-.ht-main    { animation: s7-slide-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: 0.18s; }
-.hero-foot  { animation: s7-slide-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: 0.32s; }
+@keyframes s7-jackpot-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.85); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes s7-fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Hero entrance sequence */
+.eyebrow      { animation: s7-fade-up  0.5s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: 0s;    }
+.ht-outline   { animation: s7-slide-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: 0.08s; }
+.ht-main      { animation: s7-slide-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: 0.22s; }
+.hero-foot-text { animation: s7-slide-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: 0.36s; }
+.jackpot      { animation: s7-jackpot-in 0.85s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: 0.52s; }
+
+/* Notify success reveal */
+.notify-msg:not([hidden]) {
+  animation: s7-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
 
 /* ============================================================
    Gameweek history

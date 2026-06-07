@@ -348,7 +348,7 @@
     body.innerHTML = LEADERBOARD.map((r, i) => {
       const rank = i + 1;
       const podiumCls = rank <= 3 ? ` class="lb-podium lb-pos-${rank}"` : "";
-      return `<tr${podiumCls}><td class="lb-rank">${rank}</td><td>${r.name}</td><td>${r.exact}</td><td class="num">${r.pts}</td></tr>`;
+      return `<tr${podiumCls} style="animation-delay:${0.04 + i * 0.06}s"><td class="lb-rank">${rank}</td><td>${r.name}</td><td>${r.exact}</td><td class="num">${r.pts}</td></tr>`;
     }).join("");
   }
 
@@ -480,6 +480,19 @@
     if (modalClose) modalClose.addEventListener("click", closeModal);
     const modal = $("#modal");
     if (modal) modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+
+    // FAQ open/close animation
+    document.querySelectorAll(".faq-item").forEach((details) => {
+      details.addEventListener("toggle", () => {
+        if (!details.open) return;
+        const content = details.querySelector("p");
+        if (!content) return;
+        content.animate(
+          [{ opacity: 0, transform: "translateY(-8px)" }, { opacity: 1, transform: "none" }],
+          { duration: 320, easing: "cubic-bezier(0.22, 1, 0.36, 1)", fill: "forwards" }
+        );
+      });
+    });
 
     // notify form (front-end only)
     const notifyForm = $("#notify");
