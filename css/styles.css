@@ -178,7 +178,6 @@ img { max-width: 100%; display: block; }
 .hero-inner {
   position: relative;
   z-index: 1;
-  width: 100%;
 }
 
 .eyebrow {
