@@ -63,28 +63,31 @@
     <div class="hero-bg" aria-hidden="true"></div>
     <div class="container hero-inner">
       <p class="eyebrow">Coming soon</p>
-      <h1 class="hero-title">THE <span class="hl">SUPER 7</span></h1>
-      <p class="hero-sub">An all new <strong>free to play</strong> prediction game. Win cash &amp; prizes.
-        Simply predict the score in each game and the first scorer for each of the Super 7 teams.</p>
-
+      <h1 class="hero-title">
+        <span class="ht-outline">THE</span>
+        <span class="ht-solid">SUPER</span>
+        <span class="ht-accent">7</span>
+      </h1>
+      <div class="hero-foot">
+        <div class="hero-foot-text">
+          <p class="hero-sub">An all new <strong>free to play</strong> prediction game. Predict the score &amp; first scorer for each of the <strong>Super 7 clubs</strong> every gameweek to win cash &amp; prizes.</p>
+          <div class="hero-cta">
+            <a href="game.html" class="btn btn-primary btn-lg">Play now</a>
+            <a href="#how" class="btn btn-ghost btn-lg">How it works</a>
+          </div>
+          <form class="notify" id="notify">
+            <input type="email" id="notifyEmail" class="notify-input" placeholder="Enter your email" aria-label="Email address" required />
+            <button type="submit" class="btn btn-primary btn-lg" id="notifyBtn">Notify me at launch</button>
+          </form>
+          <p class="notify-msg" id="notifyMsg" hidden>You're on the list. We'll email you the moment we kick off.</p>
+        </div>
+        <div class="jackpot">
+          <span class="jackpot-label">Launch jackpot</span>
+          <span class="jackpot-amount">£250,000</span>
+          <span class="jackpot-note">Rolls over to £1,000,000</span>
+        </div>
+      </div>
       <div class="club-row" id="clubRow" aria-label="The Super 7 clubs"></div>
-
-      <form class="notify" id="notify">
-        <input type="email" id="notifyEmail" class="notify-input" placeholder="Enter your email" aria-label="Email address" required />
-        <button type="submit" class="btn btn-primary btn-lg" id="notifyBtn">Notify me at launch</button>
-      </form>
-      <p class="notify-msg" id="notifyMsg" hidden>You're on the list. We'll email you the moment we kick off.</p>
-
-      <div class="hero-cta">
-        <a href="#how" class="btn btn-ghost btn-lg">How it works</a>
-        <a href="game.html" class="btn btn-ghost btn-lg">Play now</a>
-      </div>
-
-      <div class="jackpot">
-        <span class="jackpot-label">Launch jackpot</span>
-        <span class="jackpot-amount">£250,000</span>
-        <span class="jackpot-note">Rolls over to £1,000,000</span>
-      </div>
     </div>
   </section>
 

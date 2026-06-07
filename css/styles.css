@@ -127,7 +127,7 @@ img { max-width: 100%; display: block; }
    ============================================================ */
 .hero {
   position: relative;
-  padding: 5.5rem 0 4.5rem;
+  padding: 3.5rem 0 3.5rem;
   overflow: hidden;
 }
 
@@ -136,14 +136,13 @@ img { max-width: 100%; display: block; }
   inset: 0;
   z-index: 0;
   background:
-    radial-gradient(900px 500px at 50% -60px,
-      oklch(0.88 0.165 107 / 0.13), transparent 60%);
+    radial-gradient(600px 500px at 85% 60%,
+      oklch(0.88 0.165 107 / 0.09), transparent 60%);
 }
 
 .hero-inner {
   position: relative;
   z-index: 1;
-  text-align: center;
 }
 
 .eyebrow {
@@ -152,31 +151,117 @@ img { max-width: 100%; display: block; }
   border: 1px solid oklch(0.88 0.165 107 / 0.4);
   color: var(--s7-yellow);
   font-weight: 700;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   letter-spacing: 2.5px;
   text-transform: uppercase;
-  padding: 0.35rem 0.95rem;
+  padding: 0.32rem 0.9rem;
   border-radius: 999px;
   margin: 0 0 var(--sp-4);
 }
 
+/* Stacked headline — THE (outline) / SUPER (solid) / 7 (accent) */
 .hero-title {
-  font-size: clamp(3.5rem, 11vw, 7.5rem);
+  display: flex;
+  flex-direction: column;
   margin: 0;
-  color: var(--s7-offwhite);
-  text-shadow: 0 2px 12px oklch(0 0 0 / 0.3);
+  gap: 0;
 }
-.hero-title .hl {
+.ht-outline {
+  font-family: var(--s7-font-display);
+  font-size: clamp(2rem, 7vw, 5.5rem);
+  color: transparent;
+  -webkit-text-stroke: 2px var(--s7-offwhite);
+  line-height: 1.1;
+}
+.ht-solid {
+  font-family: var(--s7-font-display);
+  font-size: clamp(4.5rem, 22vw, 18rem);
+  color: var(--s7-offwhite);
+  line-height: 0.87;
+}
+.ht-accent {
+  font-family: var(--s7-font-display);
+  font-size: clamp(5.5rem, 28vw, 22rem);
   color: var(--s7-yellow);
-  text-shadow: 0 0 48px oklch(0.88 0.165 107 / 0.35);
+  line-height: 0.87;
 }
 
+/* Hero footer: copy left, jackpot right */
+.hero-foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--sp-8);
+  margin-top: var(--sp-8);
+  flex-wrap: wrap;
+}
+.hero-foot-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  max-width: 500px;
+}
 .hero-sub {
-  max-width: 580px;
-  margin: var(--sp-4) auto 0;
+  margin: 0;
   color: var(--s7-text-muted);
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   line-height: 1.65;
+}
+.hero-cta {
+  display: flex;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+
+/* Notify form */
+.notify {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+.notify-input {
+  flex: 1 1 200px;
+  padding: 0.9rem 1rem;
+  font-size: 0.95rem;
+  font-family: var(--s7-font-body);
+  background: oklch(0.13 0.008 95 / 0.6);
+  color: var(--s7-text);
+  border: 1.5px solid var(--s7-border);
+  border-radius: var(--s7-radius);
+}
+.notify-input::placeholder { color: var(--s7-slate); }
+.notify-input:focus {
+  outline: none;
+  border-color: var(--s7-yellow);
+}
+.notify-msg {
+  color: var(--s7-yellow);
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Jackpot */
+.jackpot {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-1);
+  flex-shrink: 0;
+}
+.jackpot-label {
+  font: 700 0.7rem/1 var(--s7-font-body);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--s7-text-muted);
+}
+.jackpot-amount {
+  font: 400 clamp(2.8rem, 5.5vw, 4.5rem)/1 var(--s7-font-display);
+  color: var(--s7-yellow);
+}
+.jackpot-note {
+  font-size: 0.82rem;
+  color: var(--s7-text-muted);
 }
 
 /* Club shields row */
@@ -185,7 +270,7 @@ img { max-width: 100%; display: block; }
   grid-template-columns: repeat(7, 1fr);
   gap: 12px;
   max-width: 880px;
-  margin: var(--sp-8) auto;
+  margin: var(--sp-8) 0 0;
 }
 .shield {
   position: relative;
@@ -216,68 +301,6 @@ img { max-width: 100%; display: block; }
   padding: 3px 8px;
   border-radius: 4px;
   border: 1px solid #fff;
-}
-
-/* Notify form */
-.notify {
-  display: flex;
-  gap: var(--sp-2);
-  justify-content: center;
-  flex-wrap: wrap;
-  margin: 0 auto var(--sp-3);
-  max-width: 520px;
-}
-.notify-input {
-  flex: 1 1 240px;
-  padding: 0.95rem 1.1rem;
-  font-size: 1rem;
-  font-family: var(--s7-font-body);
-  background: oklch(0.13 0.008 95 / 0.6);
-  color: var(--s7-text);
-  border: 1.5px solid var(--s7-border);
-  border-radius: var(--s7-radius);
-}
-.notify-input::placeholder { color: var(--s7-slate); }
-.notify-input:focus {
-  outline: none;
-  border-color: var(--s7-yellow);
-}
-.notify-msg {
-  color: var(--s7-yellow);
-  font-weight: 700;
-  margin: 0 0 var(--sp-3);
-}
-
-.hero-cta {
-  display: flex;
-  gap: var(--sp-3);
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: var(--sp-2);
-}
-
-/* Jackpot — no box, just the number */
-.jackpot {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--sp-2);
-  margin-top: var(--sp-10, 40px);
-}
-.jackpot-label {
-  font: 700 0.72rem/1 var(--s7-font-body);
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  color: var(--s7-text-muted);
-}
-.jackpot-amount {
-  font: 400 clamp(3.5rem, 9vw, 5.5rem)/1 var(--s7-font-display);
-  color: var(--s7-yellow);
-  letter-spacing: 2px;
-}
-.jackpot-note {
-  font-size: 0.88rem;
-  color: var(--s7-text-muted);
 }
 
 /* ============================================================
@@ -1002,12 +1025,15 @@ img { max-width: 100%; display: block; }
   .play-head { flex-direction: column; align-items: flex-start; }
   .deadline { text-align: left; }
   .club-row { grid-template-columns: repeat(4, 1fr); max-width: 520px; }
+  .hero-foot { flex-direction: column; align-items: flex-start; }
+  .jackpot { flex-direction: row; align-items: baseline; gap: var(--sp-3); }
 }
 
 @media (max-width: 560px) {
   .header-inner { gap: var(--sp-3); }
   .brand-mark { height: 44px; }
-  .hero { padding: 3.5rem 0 3rem; }
+  .hero { padding: 2.5rem 0 2.5rem; }
+  .ht-outline { -webkit-text-stroke-width: 1.5px; }
   .steps, .prizes { grid-template-columns: 1fr; }
   .prize-feature { flex-direction: column; align-items: flex-start; gap: var(--sp-4); padding: var(--sp-6); }
   .prize-feature .prize-amount { font-size: clamp(2.5rem, 8vw, 3.5rem); }
@@ -1026,6 +1052,7 @@ img { max-width: 100%; display: block; }
   .notify-input, .notify .btn { width: 100%; }
   .btn-lg { width: 100%; }
   .hero-cta { flex-direction: column; }
+  .jackpot { flex-direction: column; gap: var(--sp-1); }
   .cta-inner { flex-direction: column; text-align: center; }
   .section { padding: 3.5rem 0; }
   .cookie-inner { flex-direction: column; align-items: stretch; }
