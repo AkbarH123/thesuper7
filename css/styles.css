@@ -1264,6 +1264,156 @@ img { max-width: 100%; display: block; }
 .gw-scorer strong { color: var(--s7-text); }
 
 /* ============================================================
+   Slip counter banner
+   ============================================================ */
+.slip-counter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+  font-family: var(--s7-font-body);
+  flex-wrap: wrap;
+}
+.slip-counter-num {
+  font: 400 1.4rem/1 var(--s7-font-display);
+  color: var(--s7-yellow);
+  letter-spacing: 0.5px;
+}
+.slip-counter-label {
+  font-size: 0.82rem;
+  color: var(--s7-text-muted);
+}
+.slip-counter-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--s7-yellow);
+}
+@keyframes s7-live-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+.slip-counter-dot {
+  animation: s7-live-pulse 1.5s ease-in-out infinite;
+}
+
+/* ============================================================
+   Fixture form guides & H2H
+   ============================================================ */
+.fixture-meta {
+  font-size: 0.8rem;
+  color: var(--s7-text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--s7-border);
+}
+.fixture-forms {
+  display: flex;
+  flex-direction: row;
+  gap: var(--sp-6);
+}
+.form-track {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--sp-1);
+}
+.form-team-name {
+  font-weight: 700;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--s7-text-muted);
+  min-width: 2.5rem;
+}
+.fdot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.fdot-w { background: var(--s7-yellow); }
+.fdot-d { background: var(--s7-slate); }
+.fdot-l { background: transparent; border: 1.5px solid var(--s7-border); }
+.fixture-h2h {
+  font-size: 0.75rem;
+  color: var(--s7-text-muted);
+  font-style: italic;
+  margin-top: var(--sp-1);
+}
+
+/* ============================================================
+   Most popular picks
+   ============================================================ */
+.popular-picks {
+  margin-top: var(--sp-12);
+  padding-top: var(--sp-8);
+  border-top: 1px solid var(--s7-border);
+}
+.popular-title {
+  font: 400 clamp(1.6rem, 4vw, 2.4rem)/1 var(--s7-font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 var(--sp-6);
+}
+.popular-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-4);
+}
+.pop-card {
+  background: var(--s7-graphite);
+  border: 1px solid var(--s7-border);
+  border-radius: var(--s7-radius);
+  padding: var(--sp-4);
+}
+.pop-fixture {
+  font: 700 0.78rem/1 var(--s7-font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--s7-text-muted);
+  margin-bottom: var(--sp-3);
+}
+.pop-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-2);
+}
+.pop-score {
+  font: 400 1.1rem/1 var(--s7-font-display);
+  color: var(--s7-text);
+  min-width: 3.5rem;
+}
+.pop-bar-wrap {
+  flex: 1;
+  height: 6px;
+  background: oklch(0.88 0.165 107 / 0.1);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.pop-bar {
+  height: 100%;
+  background: var(--s7-yellow);
+  border-radius: 99px;
+}
+.pop-pct {
+  font: 600 0.75rem/1 var(--s7-font-body);
+  color: var(--s7-text-muted);
+  min-width: 2.5rem;
+  text-align: right;
+}
+
+/* ============================================================
    Responsive
    ============================================================ */
 @media (max-width: 860px) {

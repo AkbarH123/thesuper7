@@ -57,6 +57,12 @@
         </div>
       </div>
 
+      <div class="slip-counter">
+        <span class="slip-counter-num" id="slipCount">1,247</span>
+        <span class="slip-counter-label">slips submitted this gameweek</span>
+        <span class="slip-counter-live"><span class="slip-counter-dot">●</span> LIVE</span>
+      </div>
+
       <div class="slip">
         <div class="fixtures" id="fixtures"><!-- injected by JS --></div>
 
@@ -69,6 +75,12 @@
         </div>
       </div>
       <p class="demo-note">This is a preview. Predictions save in your browser, with no account or money required yet.</p>
+
+      <section class="popular-picks">
+        <h2 class="popular-title">Most predicted this week</h2>
+        <div class="popular-grid" id="popularGrid"></div>
+        <p class="demo-note">Based on early entries. Updates live once the game launches.</p>
+      </section>
 
       <section class="gw-history">
         <h2 class="gw-history-title">Previous gameweeks</h2>
@@ -117,6 +129,7 @@
       <h3>Slip submitted!</h3>
       <p id="modalText">You're in for Gameweek 34. Good luck!</p>
       <button class="btn btn-primary" id="modalClose">Done</button>
+      <button class="btn btn-ghost" id="shareBtn" style="margin-top: var(--sp-2); width: 100%;">Share my predictions</button>
     </div>
   </div>
 
