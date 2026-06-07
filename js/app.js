@@ -413,7 +413,7 @@
     });
 
     const els = document.querySelectorAll(
-      ".step, .prize, .faq-item, .slip, .table-wrap, .section-title, .section-lead, .cta-inner, .legal-content, .gw-history"
+      ".step, .prize, .faq-item, .slip, .table-wrap, .section-title, .section-lead, .cta-inner, .legal-content, .gw-history, .clubs-strip"
     );
     if (!els.length) return;
     els.forEach((el) => el.classList.add("reveal"));

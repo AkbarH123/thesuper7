@@ -293,22 +293,30 @@ img { max-width: 100%; display: block; }
   color: var(--s7-text-muted);
 }
 
+/* Club shields strip — sits below hero */
+.clubs-strip {
+  padding: var(--sp-6) 0 var(--sp-8);
+  border-bottom: 1px solid var(--s7-border);
+}
+
 /* Club shields row */
 .club-row {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 12px;
   max-width: 880px;
-  margin: var(--sp-8) 0 0;
+  margin: 0 auto;
 }
 .shield {
   position: relative;
-  filter: drop-shadow(0 6px 16px oklch(0 0 0 / 0.45));
-  transition: transform 0.25s ease, filter 0.25s ease;
+  opacity: 0.5;
+  filter: drop-shadow(0 4px 10px oklch(0 0 0 / 0.35));
+  transition: transform 0.25s ease, filter 0.25s ease, opacity 0.25s ease;
 }
 .shield:hover {
-  transform: translateY(-7px) scale(1.05);
-  filter: drop-shadow(0 16px 28px oklch(0 0 0 / 0.55));
+  opacity: 1;
+  transform: translateY(-6px) scale(1.05);
+  filter: drop-shadow(0 14px 24px oklch(0 0 0 / 0.5));
 }
 .shield-svg { width: 100%; height: auto; display: block; }
 .shield-name {
@@ -1060,7 +1068,6 @@ img { max-width: 100%; display: block; }
 .ht-outline { animation: s7-slide-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: 0.05s; }
 .ht-main    { animation: s7-slide-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: 0.18s; }
 .hero-foot  { animation: s7-slide-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: 0.32s; }
-.club-row   { animation: s7-slide-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: 0.45s; }
 
 /* ============================================================
    Gameweek history
@@ -1175,7 +1182,7 @@ img { max-width: 100%; display: block; }
   .prize-feature { grid-column: 1 / -1; }
   .play-head { flex-direction: column; align-items: flex-start; }
   .deadline { text-align: left; }
-  .club-row { grid-template-columns: repeat(4, 1fr); max-width: 520px; }
+  .club-row { grid-template-columns: repeat(4, 1fr); max-width: 520px; margin: 0 auto; }
   .hero-foot { flex-direction: column; align-items: flex-start; gap: var(--sp-6); }
   .jackpot { flex-direction: row; align-items: baseline; gap: var(--sp-3); flex-wrap: wrap; }
 }
