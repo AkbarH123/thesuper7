@@ -95,8 +95,17 @@ img { max-width: 100%; display: block; }
   height: 70px;
 }
 .brand { display: flex; align-items: center; gap: var(--sp-3); }
-.brand-mark { height: 52px; width: auto; }
-.footer-brand .brand-mark { height: 58px; }
+.brand-mark { height: 40px; width: auto; }
+.footer-brand .brand-mark { height: 52px; }
+.brand-word {
+  font-family: var(--s7-font-display);
+  font-size: 1.15rem;
+  letter-spacing: 1px;
+  line-height: 1;
+  white-space: nowrap;
+}
+.brand-the { color: var(--s7-offwhite); }
+.brand-s7  { color: var(--s7-yellow); }
 
 .nav {
   display: flex;
