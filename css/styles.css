@@ -136,7 +136,10 @@ img { max-width: 100%; display: block; }
    ============================================================ */
 .hero {
   position: relative;
-  padding: 3.5rem 0 3.5rem;
+  padding: 6rem 0 5rem;
+  min-height: 75vh;
+  display: flex;
+  align-items: center;
   overflow: hidden;
   animation: s7-hero-breathe 10s ease-in-out infinite;
 }
@@ -175,6 +178,7 @@ img { max-width: 100%; display: block; }
 .hero-inner {
   position: relative;
   z-index: 1;
+  width: 100%;
 }
 
 .eyebrow {
@@ -295,7 +299,7 @@ img { max-width: 100%; display: block; }
 
 /* Club shields strip — sits below hero */
 .clubs-strip {
-  padding: var(--sp-6) 0 var(--sp-8);
+  padding: var(--sp-10) 0;
   border-bottom: 1px solid var(--s7-border);
 }
 
@@ -1193,7 +1197,7 @@ img { max-width: 100%; display: block; }
   .brand-mark { height: 44px; }
 
   /* Hero */
-  .hero { padding: 2rem 0 2.5rem; }
+  .hero { padding: 3.5rem 0 3rem; min-height: 60vh; }
   .hero-inner { text-align: center; }
   .ht-outline { -webkit-text-stroke-width: 1.5px; }
   .hero-foot { align-items: center; }
