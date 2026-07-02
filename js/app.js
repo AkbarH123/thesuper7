@@ -919,6 +919,7 @@
     if (txt) txt.textContent = "Your score card is in — and it's final. No amendments. Good luck this gameweek.";
     if (m) { m.classList.add("open"); m.setAttribute("aria-hidden", "false"); }
     burstConfetti();
+    saveCardToAccount();
   }
   function closeModal() {
     const m = $("#modal");
@@ -1013,6 +1014,261 @@
   }
 
   // ============================================================
+  //  Accounts: session state, account page, score card history
+  // ============================================================
+  let ME = null; // { username, marketing, created } when logged in
+
+  async function api(path, opts) {
+    const r = await fetch(path, Object.assign({
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      credentials: "same-origin",
+    }, opts));
+    let data = null;
+    try { data = await r.json(); } catch (e) {}
+    if (!r.ok) {
+      const err = new Error((data && data.error) || ("HTTP " + r.status));
+      err.status = r.status;
+      err.unconfigured = !!(data && (data.unconfigured || r.status === 503));
+      throw err;
+    }
+    return data;
+  }
+
+  async function fetchMe() {
+    try { ME = await api("/api/auth/me"); } catch (e) { ME = null; }
+    updateHeaderAuth();
+    return ME;
+  }
+
+  function updateHeaderAuth() {
+    const loginBtn = document.querySelector('a[data-auth="login"]');
+    const signupBtn = document.querySelector('a[data-auth="signup"]');
+    if (ME) {
+      if (loginBtn) { loginBtn.textContent = "My account"; loginBtn.href = "/account"; }
+      if (signupBtn) signupBtn.hidden = true;
+    } else {
+      if (loginBtn) { loginBtn.textContent = "Log in"; loginBtn.href = "/account"; }
+      if (signupBtn) { signupBtn.hidden = false; }
+    }
+  }
+
+  // Save the just-submitted card to the user's account (game page).
+  function saveCardToAccount() {
+    if (!FIXTURES.length) return;
+    const card = {
+      gw: gwKey(),
+      fixtures: FIXTURES.map((f) => {
+        const p = slip[f.id] || {};
+        return { home: f.home, away: f.away, h: p.h, a: p.a, scorer: p.scorer || "" };
+      }),
+    };
+    if (ME) {
+      api("/api/scorecards", { method: "POST", body: JSON.stringify({ card }) })
+        .then(() => showToast("Score card saved to your account"))
+        .catch(() => showToast("Saved locally (account sync failed)"));
+    } else {
+      const txt = $("#modalText");
+      if (txt && !txt.querySelector("a")) {
+        txt.innerHTML = esc(txt.textContent) +
+          ' <a href="/account#signup" class="modal-signup-link">Create a free account</a> to keep your score card history.';
+      }
+    }
+  }
+
+  // ---- account page ----
+  function accountFormsHTML() {
+    return `
+    <div class="auth-card">
+      <div class="auth-tabs" id="authTabs">
+        <button type="button" class="auth-tab active" data-authtab="login">Log in</button>
+        <button type="button" class="auth-tab" data-authtab="signup">Sign up</button>
+      </div>
+
+      <form class="auth-form" id="loginForm" novalidate>
+        <label class="auth-label" for="loginUser">Username</label>
+        <input class="auth-input" id="loginUser" name="username" autocomplete="username" required />
+        <label class="auth-label" for="loginPass">Password</label>
+        <input class="auth-input" id="loginPass" name="password" type="password" autocomplete="current-password" required />
+        <p class="auth-error" id="loginError" hidden></p>
+        <button class="btn btn-primary btn-lg auth-submit" type="submit">Log in</button>
+      </form>
+
+      <form class="auth-form" id="signupForm" hidden novalidate>
+        <label class="auth-label" for="suUser">Username</label>
+        <input class="auth-input" id="suUser" name="username" autocomplete="username"
+               placeholder="3-20 letters, numbers or _" required />
+        <label class="auth-label" for="suPass">Password</label>
+        <input class="auth-input" id="suPass" name="password" type="password" autocomplete="new-password"
+               placeholder="At least 8 characters" required />
+        <label class="auth-label" for="suPass2">Confirm password</label>
+        <input class="auth-input" id="suPass2" type="password" autocomplete="new-password" required />
+        <label class="auth-check">
+          <input type="checkbox" id="suMarketing" />
+          <span>Email me the newsletter, offers and launch news (optional — you can change this any time)</span>
+        </label>
+        <p class="auth-error" id="signupError" hidden></p>
+        <button class="btn btn-primary btn-lg auth-submit" type="submit">Create my account</button>
+        <p class="auth-note">Free forever. Your password is stored as a salted hash, never in plain text.</p>
+      </form>
+    </div>`;
+  }
+
+  function cardHTML(card, i) {
+    const when = card.submittedAt
+      ? new Date(card.submittedAt).toLocaleString(undefined, { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })
+      : "";
+    const rows = (card.fixtures || []).map((f) => {
+      const h = Number.isInteger(f.h) ? f.h : "-";
+      const a = Number.isInteger(f.a) ? f.a : "-";
+      return `<li><span>${esc(abbr(f.home))} <strong>${h}&ndash;${a}</strong> ${esc(abbr(f.away))}</span>` +
+        `<span class="pick-scorer">${esc(f.scorer || "")}</span></li>`;
+    }).join("");
+    return `<details class="gw-week card-week"${i === 0 ? " open" : ""}>
+      <summary><span class="gw-label">Score card</span><span class="gw-date">${esc(when)}</span></summary>
+      <ul class="modal-picks card-picks">${rows}</ul>
+    </details>`;
+  }
+
+  function mode(arr) {
+    const counts = {};
+    let best = null;
+    arr.forEach((v) => {
+      if (!v) return;
+      counts[v] = (counts[v] || 0) + 1;
+      if (!best || counts[v] > counts[best]) best = v;
+    });
+    return best;
+  }
+
+  function dashboardHTML(cards) {
+    const scorers = [];
+    const scores = [];
+    cards.forEach((c) => (c.fixtures || []).forEach((f) => {
+      if (f.scorer && f.scorer !== NO_SCORER) scorers.push(f.scorer);
+      if (Number.isInteger(f.h) && Number.isInteger(f.a)) scores.push(`${f.h}-${f.a}`);
+    }));
+    const since = ME.created
+      ? new Date(ME.created).toLocaleDateString(undefined, { month: "short", year: "numeric" })
+      : "—";
+    const stats = [
+      { n: String(cards.length), l: "Score cards submitted" },
+      { n: since, l: "Member since" },
+      { n: mode(scorers) || "—", l: "Most picked first scorer" },
+      { n: mode(scores) || "—", l: "Favourite scoreline" },
+    ];
+    return `
+    <div class="dash">
+      <div class="dash-head">
+        <p class="dash-welcome">Signed in as <strong>${esc(ME.username)}</strong></p>
+        <button class="btn btn-ghost" id="logoutBtn" type="button">Log out</button>
+      </div>
+      <div class="dash-stats">
+        ${stats.map((s) => `<div class="dash-stat"><span class="dash-num">${esc(s.n)}</span><span class="dash-label">${esc(s.l)}</span></div>`).join("")}
+      </div>
+      <label class="auth-check dash-marketing">
+        <input type="checkbox" id="prefMarketing"${ME.marketing ? " checked" : ""} />
+        <span>Email me the newsletter, offers and launch news</span>
+      </label>
+      <h2 class="dash-sub">Past score cards</h2>
+      <div id="cardsList">${
+        cards.length
+          ? cards.map(cardHTML).join("")
+          : `<p class="demo-note">No score cards yet. <a href="/game">Make this week's predictions</a> and your submitted card will appear here.</p>`
+      }</div>
+      <p class="demo-note">Points and winnings per card will appear here once results settling goes live.</p>
+    </div>`;
+  }
+
+  async function renderAccountPage() {
+    const root = $("#accountBody");
+    if (!root) return;
+    const lead = $("#accountLead");
+
+    if (ME) {
+      if (lead) lead.textContent = "Your score cards, stats and preferences.";
+      let cards = [];
+      try { cards = ((await api("/api/scorecards")) || {}).cards || []; } catch (e) {}
+      root.innerHTML = dashboardHTML(cards);
+
+      const logout = $("#logoutBtn");
+      if (logout) logout.addEventListener("click", async () => {
+        try { await api("/api/auth/logout", { method: "POST", body: "{}" }); } catch (e) {}
+        ME = null;
+        location.href = "/";
+      });
+      const pref = $("#prefMarketing");
+      if (pref) pref.addEventListener("change", async () => {
+        try {
+          await api("/api/auth/prefs", { method: "POST", body: JSON.stringify({ marketing: pref.checked }) });
+          ME.marketing = pref.checked;
+          showToast("Preferences saved");
+        } catch (e) {
+          pref.checked = !pref.checked;
+          showToast("Could not save preferences");
+        }
+      });
+      return;
+    }
+
+    if (lead) lead.textContent = "Log in or create a free account to save your score cards and stats.";
+    root.innerHTML = accountFormsHTML();
+
+    const tabs = $("#authTabs");
+    const loginForm = $("#loginForm");
+    const signupForm = $("#signupForm");
+    const showTab = (which) => {
+      tabs.querySelectorAll(".auth-tab").forEach((t) => t.classList.toggle("active", t.dataset.authtab === which));
+      loginForm.hidden = which !== "login";
+      signupForm.hidden = which !== "signup";
+    };
+    tabs.addEventListener("click", (e) => {
+      const t = e.target.closest(".auth-tab");
+      if (t) showTab(t.dataset.authtab);
+    });
+    if (location.hash === "#signup") showTab("signup");
+
+    const fail = (el, msg) => { el.textContent = msg; el.hidden = false; };
+
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const errEl = $("#loginError");
+      errEl.hidden = true;
+      try {
+        ME = await api("/api/auth/login", {
+          method: "POST",
+          body: JSON.stringify({ username: $("#loginUser").value, password: $("#loginPass").value }),
+        });
+        updateHeaderAuth();
+        renderAccountPage();
+      } catch (err) {
+        fail(errEl, err.unconfigured ? "Accounts are almost ready — the database isn't connected yet." : err.message);
+      }
+    });
+
+    signupForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const errEl = $("#signupError");
+      errEl.hidden = true;
+      const pass = $("#suPass").value;
+      if (pass !== $("#suPass2").value) { fail(errEl, "Passwords don't match."); return; }
+      try {
+        ME = await api("/api/auth/signup", {
+          method: "POST",
+          body: JSON.stringify({
+            username: $("#suUser").value,
+            password: pass,
+            marketing: $("#suMarketing").checked,
+          }),
+        });
+        updateHeaderAuth();
+        renderAccountPage();
+      } catch (err) {
+        fail(errEl, err.unconfigured ? "Accounts are almost ready — the database isn't connected yet." : err.message);
+      }
+    });
+  }
+
+  // ============================================================
   //  Page life: count-ups, tilt, scroll progress, header state
   // ============================================================
   function setupPageLife() {
@@ -1082,6 +1338,7 @@
     renderHistory();
     renderPopularPicks();
     setupPageLife();
+    fetchMe().then(renderAccountPage);
 
     const fixtures = $("#fixtures");
     if (fixtures) {

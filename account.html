@@ -1,10 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>404 — Page Not Found | The Super 7</title>
-  <meta name="description" content="This page doesn't exist, but The Super 7 prediction game does. Head back and make your predictions." />
+  <title>My Account | The Super 7</title>
+  <meta name="description" content="Log in or create your free Super 7 account to save your score cards, track your stats and manage your preferences." />
+  <link rel="canonical" href="https://www.thesuper7.com/account" />
   <meta name="robots" content="noindex, follow" />
   <meta name="theme-color" content="#1A1B1D" />
   <link rel="icon" href="brand/assets/logo.png" type="image/png" />
@@ -35,23 +36,18 @@
             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
           </svg>
         </a>
-        <a href="/account" class="btn btn-ghost" data-auth="login">Log in</a>
-        <a href="/account#signup" class="btn btn-primary" data-auth="signup">Sign up</a>
+        <a href="/game" class="btn btn-primary">Play</a>
       </div>
       <button class="menu-toggle" id="menuToggle" aria-label="Menu">&#9776;</button>
     </div>
   </header>
 
-  <!-- ===== 404 content ===== -->
-  <main class="not-found-page">
-    <div class="container not-found-inner">
-      <div class="not-found-num">4<span>0</span>4</div>
-      <h1 class="not-found-title">Wrong prediction.</h1>
-      <p class="not-found-sub">This page doesn't exist — but the £250,000 jackpot does.</p>
-      <div class="not-found-actions">
-        <a href="/" class="btn btn-primary btn-lg">Back to home</a>
-        <a href="/game" class="btn btn-ghost btn-lg">Make your predictions</a>
-      </div>
+  <!-- ===== Account ===== -->
+  <main class="section page-top">
+    <div class="container account-container" id="accountRoot">
+      <h1 class="section-title">My account</h1>
+      <p class="section-lead" id="accountLead">Checking your session&hellip;</p>
+      <div id="accountBody"><!-- rendered by JS --></div>
     </div>
   </main>
 
@@ -87,19 +83,8 @@
     </div>
   </footer>
 
-  <!-- ===== Cookie banner ===== -->
-  <div class="cookie-banner" id="cookieBanner" role="dialog" aria-label="Cookie preferences">
-    <div class="cookie-inner container">
-      <div class="cookie-text">
-        <strong>Cookies &amp; Privacy</strong>
-        <p>We use essential cookies to keep the site working. With your consent we may also use analytics cookies to improve your experience. <a href="/privacy">Privacy Policy</a></p>
-      </div>
-      <div class="cookie-actions">
-        <button class="btn btn-ghost" id="cookieEssential">Essential only</button>
-        <button class="btn btn-primary" id="cookieAccept">Accept all</button>
-      </div>
-    </div>
-  </div>
+  <!-- Save toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite">Saved</div>
 
   <script src="js/app.js"></script>
 </body>
