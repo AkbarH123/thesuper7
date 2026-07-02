@@ -77,6 +77,17 @@
         <span class="slip-counter-live"><span class="slip-counter-dot">●</span> LIVE</span>
       </div>
 
+      <!-- Submitted banner (shown by JS once a slip is in) -->
+      <div class="submitted-banner" id="submittedBanner" hidden>
+        <span class="submitted-dot" aria-hidden="true"></span>
+        <p>Your slip is in. You can keep editing until the deadline &mdash; changes save automatically.</p>
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-wrap" aria-label="Prediction progress">
+        <div class="progress-track" id="progressTrack"><!-- segments injected by JS --></div>
+      </div>
+
       <div class="slip">
         <div class="fixtures" id="fixtures"><!-- injected by JS --></div>
 
@@ -142,10 +153,14 @@
       <div class="modal-check">&#10003;</div>
       <h3>Slip submitted!</h3>
       <p id="modalText">You're in for Gameweek 34. Good luck!</p>
+      <ul class="modal-picks" id="modalPicks"></ul>
       <button class="btn btn-primary" id="modalClose">Done</button>
       <button class="btn btn-ghost" id="shareBtn" style="margin-top: var(--sp-2); width: 100%;">Share my predictions</button>
     </div>
   </div>
+
+  <!-- Save toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite">Saved</div>
 
   <!-- ===== Cookie banner ===== -->
   <div class="cookie-banner" id="cookieBanner" role="dialog" aria-label="Cookie preferences">

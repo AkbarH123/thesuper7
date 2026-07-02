@@ -1805,3 +1805,94 @@ img { max-width: 100%; display: block; }
   .cookie-actions { flex-direction: row; gap: var(--sp-2); }
   .cookie-actions .btn { flex: 1; padding: 0.6rem 0.8rem; font-size: 0.88rem; }
 }
+
+/* ============================================================
+   Game 2.0 addendum — chips, progress, sticky submit, feedback
+   ============================================================ */
+
+/* Sticky slip footer (overflow:hidden on .slip would break sticky) */
+.slip { overflow: visible; }
+.fixtures { border-radius: var(--s7-radius-lg) var(--s7-radius-lg) 0 0; overflow: hidden; }
+.slip-footer {
+  position: sticky; bottom: 0; z-index: 30;
+  background: oklch(0.13 0.008 95 / 0.92);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border-top: 1px solid var(--s7-border);
+  border-radius: 0 0 var(--s7-radius-lg) var(--s7-radius-lg);
+  box-shadow: 0 -8px 24px rgba(0,0,0,.35);
+}
+
+/* First-scorer chips */
+.scorer-chips { display: flex; flex-wrap: wrap; gap: .45rem; }
+.chip {
+  padding: .42rem .85rem; border-radius: 999px; cursor: pointer;
+  background: transparent; color: var(--s7-text);
+  border: 1.5px solid var(--s7-border); font-family: var(--s7-font-body);
+  font-size: .88rem; font-weight: 600; white-space: nowrap;
+  transition: border-color .15s ease, background .15s ease, color .15s ease, transform .12s ease;
+}
+.chip:hover { border-color: var(--s7-yellow); color: var(--s7-yellow); transform: translateY(-1px); }
+.chip.sel { background: var(--s7-yellow); border-color: var(--s7-yellow); color: var(--s7-ink); }
+.chip-other { border-style: dashed; }
+.fixture-scorer .scorer-input { margin-top: .55rem; }
+
+/* Progress */
+.progress-wrap { margin: 0 0 1.1rem; }
+.progress-track { display: flex; gap: 6px; }
+.progress-seg { flex: 1; height: 8px; border-radius: 4px; background: rgba(255,255,255,.1); transition: background .3s ease, box-shadow .3s ease; }
+.progress-seg.filled { background: var(--s7-yellow); box-shadow: 0 0 10px rgba(220,225,64,.5); }
+
+/* Submitted banner */
+.submitted-banner {
+  display: flex; align-items: center; gap: .7rem;
+  background: rgba(220,225,64,.08); border: 1px solid rgba(220,225,64,.5);
+  border-radius: 12px; padding: .8rem 1.1rem; margin-bottom: 1.1rem;
+}
+.submitted-banner p { margin: 0; font-size: .92rem; color: var(--s7-text); }
+.submitted-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--s7-yellow); flex: 0 0 auto; animation: s7-glowdot 2s ease-in-out infinite; }
+@keyframes s7-glowdot { 0%,100% { box-shadow: 0 0 0 0 rgba(220,225,64,.5); } 50% { box-shadow: 0 0 0 6px rgba(220,225,64,0); } }
+
+/* Toast */
+.toast {
+  position: fixed; left: 50%; bottom: 84px; transform: translate(-50%, 16px);
+  background: var(--s7-graphite); color: var(--s7-text); border: 1px solid var(--s7-border);
+  padding: .55rem 1.1rem; border-radius: 999px; font-size: .88rem; font-weight: 600;
+  opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s ease; z-index: 90;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* Confetti */
+.confetti { position: fixed; inset: 0; pointer-events: none; z-index: 120; overflow: hidden; }
+.confetti span { position: absolute; top: -12px; border-radius: 2px; animation: s7-fall linear both; }
+@keyframes s7-fall { to { transform: translateY(105vh) rotate(560deg); } }
+
+/* Modal picks summary */
+.modal-picks { list-style: none; margin: 0 0 1.2rem; padding: 0; text-align: left; max-height: 38vh; overflow-y: auto; }
+.modal-picks li { display: flex; justify-content: space-between; gap: 1rem; padding: .45rem .2rem; border-bottom: 1px solid var(--s7-border); font-size: .95rem; }
+.modal-picks li:last-child { border-bottom: 0; }
+.modal-picks strong { color: var(--s7-yellow); font-family: var(--s7-font-display); letter-spacing: 1px; }
+.pick-scorer { color: var(--s7-text-muted); }
+
+/* Skeleton loading */
+@keyframes s7-shimmer { from { background-position: -200px 0; } to { background-position: 200px 0; } }
+.fixture.skeleton { pointer-events: none; }
+.sk-line, .sk-dot, .sk-score {
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(255,255,255,.05) 25%, rgba(255,255,255,.12) 50%, rgba(255,255,255,.05) 75%);
+  background-size: 400px 100%; animation: s7-shimmer 1.2s linear infinite;
+}
+.sk-row { display: flex; align-items: center; gap: .8rem; margin: .7rem 0; }
+.sk-line { height: 14px; flex: 1; }
+.sk-line.sk-sm { width: 40%; flex: none; height: 10px; }
+.sk-line.sk-chips { height: 30px; border-radius: 999px; }
+.sk-dot { width: 38px; height: 38px; border-radius: 50%; flex: none; }
+.sk-score { width: 90px; height: 34px; flex: none; }
+
+/* Game mobile tweaks */
+@media (max-width: 560px) {
+  .scorer-chips { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .scorer-chips::-webkit-scrollbar { display: none; }
+  .chip { padding: .5rem .9rem; }             /* bigger touch targets */
+  .slip-footer .btn { padding: .6rem .9rem; font-size: .9rem; }
+  .toast { bottom: 96px; }
+}

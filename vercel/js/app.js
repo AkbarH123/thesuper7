@@ -10,13 +10,13 @@
 
   // ---- The Super 7 clubs (home colour schemes) ----
   const CLUBS = {
-    ARS: { name: "Arsenal",    bg: "#EF0107", text: "#FFFFFF", border: "#DAA520" },
-    CHE: { name: "Chelsea",    bg: "#034694", text: "#FFFFFF", border: "#FFFFFF" },
-    LIV: { name: "Liverpool",  bg: "#C8102E", text: "#F6EB61", border: "#F6EB61" },
-    MCI: { name: "Man City",   bg: "#6CABDD", text: "#1C2C5B", border: "#1C2C5B" },
-    MUN: { name: "Man United", bg: "#DA291C", text: "#FFFFFF", border: "#000000" },
-    NEW: { name: "Newcastle",  bg: "#000000", text: "#FFFFFF", border: "#41B6E6", stripe: true },
-    TOT: { name: "Tottenham",  bg: "#FFFFFF", text: "#132257", border: "#132257" },
+    ARS: { name: "Arsenal",    bg: "#EF0107", text: "#FFFFFF", border: "#DAA520", form: ["W","W","D","W","L"] },
+    CHE: { name: "Chelsea",    bg: "#034694", text: "#FFFFFF", border: "#FFFFFF", form: ["W","D","W","L","W"] },
+    LIV: { name: "Liverpool",  bg: "#C8102E", text: "#F6EB61", border: "#F6EB61", form: ["W","W","W","D","W"] },
+    MCI: { name: "Man City",   bg: "#6CABDD", text: "#1C2C5B", border: "#1C2C5B", form: ["W","W","L","W","W"] },
+    MUN: { name: "Man United", bg: "#DA291C", text: "#FFFFFF", border: "#000000", form: ["D","L","W","D","L"] },
+    NEW: { name: "Newcastle",  bg: "#000000", text: "#FFFFFF", border: "#41B6E6", stripe: true, form: ["W","D","W","W","D"] },
+    TOT: { name: "Tottenham",  bg: "#FFFFFF", text: "#132257", border: "#132257", form: ["L","W","D","L","W"] },
   };
 
   // Map various team-name spellings (from the API) to our club codes.
@@ -52,6 +52,67 @@
     { id: "demo-6", home: "Tottenham",  away: "Crystal Palace", super7: "Tottenham" },
   ];
 
+  // Form guides and H2H metadata keyed by club code
+  const FIXTURE_META = {
+    "ARS": { form: ["W","W","D","W","L"], h2h_vs: { "CHE": "Arsenal won 3 of the last 5 H2H", "NEW": "Last 5: ARS 3W 1D 1L" } },
+    "CHE": { form: ["W","D","W","L","W"], h2h_vs: { "ARS": "Chelsea won 2 of the last 5 H2H", "BHA": "Last 5: CHE 2W 2D 1L" } },
+    "LIV": { form: ["W","W","W","D","W"], h2h_vs: { "MCI": "Liverpool won 3 of the last 5 H2H", "WOL": "Last 5: LIV 4W 1D 0L" } },
+    "MCI": { form: ["W","W","L","W","W"], h2h_vs: { "LIV": "Man City won 2 of the last 5 H2H", "FUL": "Last 5: MCI 4W 1D 0L" } },
+    "MUN": { form: ["D","L","W","D","L"], h2h_vs: { "TOT": "Last 5: even split", "BHA": "Last 5: MUN 2W 1D 2L" } },
+    "NEW": { form: ["W","D","W","W","D"], h2h_vs: { "ARS": "Newcastle won 1 of last 5 H2H", "CRY": "Last 5: NEW 3W 1D 1L" } },
+    "TOT": { form: ["L","W","D","L","W"], h2h_vs: { "MUN": "Spurs won 2 of last 5 H2H", "EVE": "Last 5: TOT 4W 0D 1L" } },
+  };
+
+  // Demo data for most popular predictions
+  const POPULAR = [
+    { fixture: "Arsenal vs Chelsea",      picks: [{ score: "2–1", pct: 34 }, { score: "1–0", pct: 21 }] },
+    { fixture: "Brentford vs Chelsea",    picks: [{ score: "1–1", pct: 28 }, { score: "0–1", pct: 24 }] },
+    { fixture: "Liverpool vs Wolves",     picks: [{ score: "3–0", pct: 42 }, { score: "2–0", pct: 31 }] },
+    { fixture: "Man City vs Fulham",      picks: [{ score: "2–0", pct: 38 }, { score: "3–0", pct: 26 }] },
+    { fixture: "Brighton vs Man United",  picks: [{ score: "1–1", pct: 29 }, { score: "1–0", pct: 22 }] },
+    { fixture: "Newcastle vs Crystal Pal",picks: [{ score: "2–0", pct: 36 }, { score: "1–0", pct: 28 }] },
+    { fixture: "Tottenham vs Everton",    picks: [{ score: "2–0", pct: 41 }, { score: "1–0", pct: 29 }] },
+  ];
+
+  const HISTORY = [
+    {
+      gw: 33, date: "Sat 31 May 2026",
+      results: [
+        { home: "Arsenal",    away: "Newcastle",      score: "3–1", super7: "Arsenal",    scorer: "Saka" },
+        { home: "Brentford",  away: "Chelsea",        score: "1–2", super7: "Chelsea",    scorer: "Palmer" },
+        { home: "Liverpool",  away: "Wolves",         score: "4–0", super7: "Liverpool",  scorer: "Salah" },
+        { home: "Man City",   away: "Fulham",         score: "2–0", super7: "Man City",   scorer: "Haaland" },
+        { home: "Brighton",   away: "Man United",     score: "1–1", super7: "Man United", scorer: "Højlund" },
+        { home: "Newcastle",  away: "Crystal Palace", score: "2–0", super7: "Newcastle",  scorer: "Isak" },
+        { home: "Tottenham",  away: "Everton",        score: "3–0", super7: "Tottenham",  scorer: "Son" },
+      ]
+    },
+    {
+      gw: 32, date: "Sat 24 May 2026",
+      results: [
+        { home: "Arsenal",    away: "Aston Villa",    score: "2–1", super7: "Arsenal",    scorer: "Martinelli" },
+        { home: "Chelsea",    away: "Brighton",       score: "2–0", super7: "Chelsea",    scorer: "Jackson" },
+        { home: "Everton",    away: "Liverpool",      score: "0–3", super7: "Liverpool",  scorer: "Núñez" },
+        { home: "Man City",   away: "Bournemouth",    score: "3–1", super7: "Man City",   scorer: "Foden" },
+        { home: "Man United", away: "Luton",          score: "2–0", super7: "Man United", scorer: "Rashford" },
+        { home: "Newcastle",  away: "Sheffield Utd",  score: "3–0", super7: "Newcastle",  scorer: "Gordon" },
+        { home: "Tottenham",  away: "Burnley",        score: "4–1", super7: "Tottenham",  scorer: "Son" },
+      ]
+    },
+    {
+      gw: 31, date: "Sat 17 May 2026",
+      results: [
+        { home: "Arsenal",    away: "Brentford",      score: "1–0", super7: "Arsenal",    scorer: "Havertz" },
+        { home: "Chelsea",    away: "Nottm Forest",   score: "3–1", super7: "Chelsea",    scorer: "Nkunku" },
+        { home: "Liverpool",  away: "Burnley",        score: "3–0", super7: "Liverpool",  scorer: "Salah" },
+        { home: "Man City",   away: "Leicester",      score: "4–1", super7: "Man City",   scorer: "Doku" },
+        { home: "Man United", away: "West Ham",       score: "2–0", super7: "Man United", scorer: "Garnacho" },
+        { home: "Newcastle",  away: "Ipswich",        score: "3–1", super7: "Newcastle",  scorer: "Isak" },
+        { home: "Tottenham",  away: "Southampton",    score: "4–0", super7: "Tottenham",  scorer: "Son" },
+      ]
+    },
+  ];
+
   const LEADERBOARD = [
     { name: "GoonerGuru",     exact: 6, pts: 38 },
     { name: "KopEndKid",      exact: 5, pts: 34 },
@@ -64,10 +125,14 @@
   ];
 
   const STORE_KEY = "super7.slip.v3";
+  const SUBMIT_KEY = "super7.submitted.v1";
   const NOTIFY_KEY = "super7.notify";
+  const NO_SCORER = "No goalscorer";
 
   // ---- helpers ----
   const $ = (sel, root = document) => root.querySelector(sel);
+  const esc = (s) => String(s == null ? "" : s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   const codeFor = (name) => NAME_TO_CODE[(name || "").trim().toLowerCase()] || null;
   const meta = (name) => {
     const c = codeFor(name);
@@ -87,6 +152,7 @@
   }
   function saveSlip() {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(slip)); } catch (e) {}
+    showToast("Saved");
   }
 
   let slip = loadSlip();   // { [fixtureId]: { h, a, scorer } }
@@ -127,17 +193,36 @@
         ? `<span class="name-chip" style="border-color:${c.border}">${c.name}</span>`
         : c.name;
       const nameStyle = c.stripe ? "" : `color:${c.text}`;
+      const formDots = (c.form || []).map((r) =>
+        `<span class="form-dot form-dot-${r}" title="${r === "W" ? "Win" : r === "D" ? "Draw" : "Loss"}"></span>`
+      ).join("");
+      const formGuide = formDots ? `<div class="form-guide" aria-label="Recent form">${formDots}</div>` : "";
       return `<div class="shield" title="${c.name}">${body}` +
-        `<span class="shield-name" style="${nameStyle}">${nameInner}</span></div>`;
+        `<span class="shield-name" style="${nameStyle}">${nameInner}</span>${formGuide}</div>`;
     }).join("");
   }
 
   // ============================================================
   //  Game: fixtures + predictions
   // ============================================================
+  function renderSkeletons() {
+    const wrap = $("#fixtures");
+    if (!wrap) return;
+    let html = "";
+    for (let i = 0; i < 7; i++) {
+      html += `<div class="fixture skeleton" aria-hidden="true">
+        <div class="sk-line sk-sm"></div>
+        <div class="sk-row"><div class="sk-dot"></div><div class="sk-line"></div><div class="sk-score"></div><div class="sk-line"></div><div class="sk-dot"></div></div>
+        <div class="sk-line sk-chips"></div>
+      </div>`;
+    }
+    wrap.innerHTML = html;
+  }
+
   async function loadFixtures() {
     const wrap = $("#fixtures");
     if (!wrap) return; // not the game page
+    renderSkeletons();
     try {
       const r = await fetch("/api/fixtures", { headers: { Accept: "application/json" } });
       if (!r.ok) throw new Error("status " + r.status);
@@ -153,6 +238,7 @@
     renderFixtures();
     startCountdown();
     updateStatus();
+    updateSubmittedBanner();
   }
 
   function badge(name) {
@@ -170,20 +256,53 @@
     } catch (e) { return f.date; }
   }
 
+  function formDotsHTML(form) {
+    if (!Array.isArray(form)) return "";
+    return form.map((r) => `<span class="fdot fdot-${r.toLowerCase()}"></span>`).join("");
+  }
+
+  // Tappable first-scorer chips (+ "No goal" and an "Other…" free-text input).
+  function scorerChips(f, s7code, pick) {
+    const players = SCORERS[s7code] || [];
+    const options = players.concat(NO_SCORER);
+    const isCustom = !!pick.scorer && options.indexOf(pick.scorer) === -1;
+    let html = `<div class="scorer-chips" role="group" aria-label="First scorer">`;
+    options.forEach((p) => {
+      const sel = pick.scorer === p ? " sel" : "";
+      const label = p === NO_SCORER ? "No goal" : p;
+      html += `<button type="button" class="chip${sel}" data-val="${esc(p)}">${esc(label)}</button>`;
+    });
+    html += `<button type="button" class="chip chip-other${isCustom ? " sel" : ""}" data-other="1">Other&hellip;</button>`;
+    html += `</div>`;
+    html += `<input class="scorer-input" data-id="${esc(f.id)}" placeholder="Type a player name"
+             value="${isCustom ? esc(pick.scorer) : ""}"${isCustom ? "" : " hidden"} />`;
+    return html;
+  }
+
   function renderFixtures() {
     const wrap = $("#fixtures");
     if (!wrap) return;
-    wrap.innerHTML = FIXTURES.map((f) => {
+    wrap.innerHTML = FIXTURES.map((f, i) => {
       const s7code = codeFor(f.super7) || codeFor(f.home) || codeFor(f.away);
-      const s7name = (s7code && CLUBS[s7code].name) || f.super7 || f.home;
+      const s7club = s7code ? CLUBS[s7code] : null;
+      const s7name = (s7club && s7club.name) || f.super7 || f.home;
+      const clubAccent = s7club ? s7club.bg : "transparent";
       const pick = slip[f.id] || {};
-      const hv = Number.isInteger(pick.h) ? pick.h : "-";
-      const av = Number.isInteger(pick.a) ? pick.a : "-";
-      const dl = (SCORERS[s7code] || []).concat("No goalscorer")
-        .map((p) => `<option value="${p}"></option>`).join("");
+      const hv = Number.isInteger(pick.h) ? pick.h : 0;
+      const av = Number.isInteger(pick.a) ? pick.a : 0;
       const when = fixtureDateLabel(f);
+      const done = isComplete(pick);
+      const homeCode = codeFor(f.home);
+      const awayCode = codeFor(f.away);
+      const homeMeta = homeCode ? FIXTURE_META[homeCode] : null;
+      const awayMeta = awayCode ? FIXTURE_META[awayCode] : null;
+      const h2hText = (homeMeta && homeMeta.h2h_vs && awayCode && homeMeta.h2h_vs[awayCode])
+        ? homeMeta.h2h_vs[awayCode]
+        : (awayMeta && awayMeta.h2h_vs && homeCode && awayMeta.h2h_vs[homeCode])
+          ? awayMeta.h2h_vs[homeCode]
+          : null;
       return `
-      <div class="fixture" data-id="${f.id}">
+      <div class="fixture${done ? " done" : ""}" data-id="${f.id}" style="--club-accent:${clubAccent};animation-delay:${i * 0.07}s">
         ${when ? `<div class="fixture-date">${when}</div>` : ""}
         <div class="fixture-main">
           <div class="team home">
@@ -191,16 +310,16 @@
             <span class="team-name">${f.home}</span>
           </div>
           <div class="score">
-            <div class="stepper" data-side="h">
-              <button type="button" data-d="1" aria-label="Home up">▲</button>
-              <button type="button" data-d="-1" aria-label="Home down">▼</button>
+            <div class="score-control" data-side="h">
+              <button class="score-btn" type="button" data-d="-1" aria-label="Decrease home score">&minus;</button>
+              <span class="score-val" data-side="h">${hv}</span>
+              <button class="score-btn" type="button" data-d="1" aria-label="Increase home score">+</button>
             </div>
-            <span class="score-val" data-side="h">${hv}</span>
-            <span class="score-dash">-</span>
-            <span class="score-val" data-side="a">${av}</span>
-            <div class="stepper" data-side="a">
-              <button type="button" data-d="1" aria-label="Away up">▲</button>
-              <button type="button" data-d="-1" aria-label="Away down">▼</button>
+            <span class="score-dash">&ndash;</span>
+            <div class="score-control" data-side="a">
+              <button class="score-btn" type="button" data-d="-1" aria-label="Decrease away score">&minus;</button>
+              <span class="score-val" data-side="a">${av}</span>
+              <button class="score-btn" type="button" data-d="1" aria-label="Increase away score">+</button>
             </div>
           </div>
           <div class="team away">
@@ -209,14 +328,28 @@
           </div>
         </div>
         <div class="fixture-scorer">
-          <label for="scorer-${f.id}">${s7name} first scorer</label>
-          <input class="scorer-input" id="scorer-${f.id}" data-id="${f.id}" list="dl-${f.id}"
-                 placeholder="First scorer" value="${pick.scorer ? String(pick.scorer).replace(/"/g, "&quot;") : ""}" />
-          <datalist id="dl-${f.id}">${dl}</datalist>
+          <label>
+            <span class="scorer-badge" style="background:${clubAccent};color:${s7club ? s7club.text : "#fff"}">${s7code || "?"}</span>
+            ${s7name} first scorer
+          </label>
+          ${scorerChips(f, s7code, pick)}
         </div>
+        <div class="fixture-meta">
+          <div class="fixture-forms">
+            <div class="form-track">
+              <span class="form-team-name">${homeCode || f.home.slice(0, 3).toUpperCase()}</span>
+              ${formDotsHTML(homeMeta ? homeMeta.form : null)}
+            </div>
+            <div class="form-track">
+              <span class="form-team-name">${awayCode || f.away.slice(0, 3).toUpperCase()}</span>
+              ${formDotsHTML(awayMeta ? awayMeta.form : null)}
+            </div>
+          </div>
+          ${h2hText ? `<div class="fixture-h2h">${h2hText}</div>` : ""}
+        </div>
+        <div class="fixture-done-badge"${done ? "" : ' hidden'}>&#10003; Complete</div>
       </div>`;
     }).join("");
-    markDone();
   }
 
   function isComplete(p) {
@@ -224,8 +357,18 @@
   }
   function markDone() {
     document.querySelectorAll(".fixture").forEach((el) => {
-      el.classList.toggle("done", isComplete(slip[el.dataset.id]));
+      const done = isComplete(slip[el.dataset.id]);
+      el.classList.toggle("done", done);
+      const badge = el.querySelector(".fixture-done-badge");
+      if (badge) badge.hidden = !done;
     });
+  }
+
+  function pulseEl(el) {
+    el.classList.remove("pulse");
+    void el.offsetWidth;
+    el.classList.add("pulse");
+    el.addEventListener("animationend", () => el.classList.remove("pulse"), { once: true });
   }
 
   function step(id, side, delta) {
@@ -236,7 +379,20 @@
     slip[id] = p;
     saveSlip();
     const el = document.querySelector(`.fixture[data-id="${id}"]`);
-    if (el) el.querySelector(`.score-val[data-side="${side}"]`).textContent = v;
+    if (el) {
+      const valEl = el.querySelector(`.score-val[data-side="${side}"]`);
+      valEl.textContent = v;
+      pulseEl(valEl);
+    }
+    markDone();
+    updateStatus();
+  }
+
+  function setScorerValue(id, value) {
+    const p = slip[id] || {};
+    if (value) p.scorer = value; else delete p.scorer;
+    slip[id] = p;
+    saveSlip();
     markDone();
     updateStatus();
   }
@@ -255,7 +411,33 @@
         (n < total ? ", add scores and first scorers" : ", ready to submit");
       status.classList.toggle("ready", n === total && total > 0);
     }
-    if (submit) submit.disabled = !(n === total && total > 0);
+    if (submit) {
+      const wasDisabled = submit.disabled;
+      submit.disabled = !(n === total && total > 0);
+      if (wasDisabled && !submit.disabled) pulseEl(submit);
+    }
+    renderProgress(n, total);
+  }
+
+  function renderProgress(n, total) {
+    const track = $("#progressTrack");
+    if (!track) return;
+    if (track.children.length !== total) {
+      track.innerHTML = Array.from({ length: total }, () => `<span class="progress-seg"></span>`).join("");
+    }
+    Array.prototype.forEach.call(track.children, (seg, i) => {
+      seg.classList.toggle("filled", i < n);
+    });
+  }
+
+  // ---- submitted state ----
+  function updateSubmittedBanner() {
+    const banner = $("#submittedBanner");
+    const submit = $("#submitBtn");
+    let submitted = null;
+    try { submitted = JSON.parse(localStorage.getItem(SUBMIT_KEY)); } catch (e) {}
+    if (banner) banner.hidden = !submitted;
+    if (submit && submitted) submit.textContent = "Update predictions";
   }
 
   // ---- countdown to the first fixture (or next Saturday 3pm) ----
@@ -285,6 +467,7 @@
       const ss = Math.floor(diff / 1000);
       const pad = (n) => String(n).padStart(2, "0");
       el.textContent = (dd > 0 ? dd + "d " : "") + `${pad(hh)}:${pad(mm)}:${pad(ss)}`;
+      el.classList.toggle("urgent", diff > 0 && diff < 3600000);
     };
     tick();
     if (countdownTimer) clearInterval(countdownTimer);
@@ -297,19 +480,65 @@
   function renderLeaderboard() {
     const body = $("#leaderboardBody");
     if (!body) return;
-    body.innerHTML = LEADERBOARD.map((r, i) =>
-      `<tr><td class="lb-rank">${i + 1}</td><td>${r.name}</td><td>${r.exact}</td><td class="num">${r.pts}</td></tr>`
-    ).join("");
+    body.innerHTML = LEADERBOARD.map((r, i) => {
+      const rank = i + 1;
+      const podiumCls = rank <= 3 ? ` class="lb-podium lb-pos-${rank}"` : "";
+      return `<tr${podiumCls} style="animation-delay:${0.04 + i * 0.06}s"><td class="lb-rank">${rank}</td><td>${r.name}</td><td>${r.exact}</td><td class="num">${r.pts}</td></tr>`;
+    }).join("");
   }
 
   // ============================================================
   //  Modal
   // ============================================================
+  function renderModalPicks() {
+    const ul = $("#modalPicks");
+    if (!ul) return;
+    ul.innerHTML = FIXTURES.map((f) => {
+      const p = slip[f.id] || {};
+      const h = Number.isInteger(p.h) ? p.h : "-";
+      const a = Number.isInteger(p.a) ? p.a : "-";
+      return `<li><span>${esc(abbr(f.home))} <strong>${h}&ndash;${a}</strong> ${esc(abbr(f.away))}</span>` +
+        `<span class="pick-scorer">${esc(p.scorer || "")}</span></li>`;
+    }).join("");
+  }
+
+  function burstConfetti() {
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const colors = ["#DCE140", "#E8ED5A", "#C7C8CA", "#FFFFFF"];
+    const holder = document.createElement("div");
+    holder.className = "confetti";
+    for (let i = 0; i < 70; i++) {
+      const s = document.createElement("span");
+      s.style.left = Math.random() * 100 + "vw";
+      s.style.background = colors[i % colors.length];
+      s.style.animationDuration = 1.8 + Math.random() * 1.6 + "s";
+      s.style.animationDelay = Math.random() * 0.4 + "s";
+      s.style.width = s.style.height = 5 + Math.random() * 6 + "px";
+      holder.appendChild(s);
+    }
+    document.body.appendChild(holder);
+    setTimeout(() => holder.remove(), 4200);
+  }
+
+  let toastTimer = null;
+  function showToast(msg) {
+    const t = $("#toast");
+    if (!t) return;
+    t.textContent = msg;
+    t.classList.add("show");
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("show"), 1400);
+  }
+
   function openModal() {
+    try { localStorage.setItem(SUBMIT_KEY, JSON.stringify({ at: Date.now() })); } catch (e) {}
+    updateSubmittedBanner();
+    renderModalPicks();
     const m = $("#modal");
     const txt = $("#modalText");
     if (txt) txt.textContent = "Your Super 7 slip is locked in. Good luck this gameweek.";
     if (m) { m.classList.add("open"); m.setAttribute("aria-hidden", "false"); }
+    burstConfetti();
   }
   function closeModal() {
     const m = $("#modal");
@@ -317,47 +546,132 @@
   }
 
   // ============================================================
+  //  Gameweek history
+  // ============================================================
+  function renderHistory() {
+    const list = $("#gwList");
+    if (!list) return;
+    if (!HISTORY.length) { list.innerHTML = "<p class='demo-note'>No previous results yet.</p>"; return; }
+    list.innerHTML = HISTORY.map((gw) => {
+      const rows = gw.results.map((r) => {
+        const s7code = codeFor(r.super7);
+        const s7club = s7code ? CLUBS[s7code] : null;
+        const accent = s7club ? s7club.bg : "transparent";
+        const textCol = s7club ? s7club.text : "#fff";
+        return `<div class="gw-row" style="--club-accent:${accent}">
+        <div class="gw-match">
+          <div class="gw-team">${badge(r.home)}<span>${r.home}</span></div>
+          <div class="gw-score">${r.score}</div>
+          <div class="gw-team away">${badge(r.away)}<span>${r.away}</span></div>
+        </div>
+        <div class="gw-scorer">
+          <span class="scorer-badge" style="background:${accent};color:${textCol}">${s7code || "?"}</span>
+          First scorer: <strong>${r.scorer}</strong>
+        </div>
+      </div>`;
+      }).join("");
+      return `<details class="gw-week">
+      <summary><span class="gw-label">Gameweek ${gw.gw}</span><span class="gw-date">${gw.date}</span></summary>
+      <div class="gw-results">${rows}</div>
+    </details>`;
+    }).join("");
+  }
+
+  // ============================================================
   //  Reveal on scroll
   // ============================================================
   function setupReveal() {
-    const els = document.querySelectorAll(
-      ".step, .prize, .faq-item, .slip, .table-wrap, .section-title, .section-lead, .cta-inner, .legal-content"
-    );
-    if (!els.length) return;
     const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce || !("IntersectionObserver" in window)) return;
+
+    // Add stagger delay within sibling groups
+    [".step", ".prize", ".faq-item"].forEach((sel) => {
+      document.querySelectorAll(sel).forEach((el, i) => {
+        el.style.transitionDelay = `${i * 0.09}s`;
+      });
+    });
+
+    const els = document.querySelectorAll(
+      ".step, .prize, .faq-item, .slip, .table-wrap, .section-title, .section-lead, .section-cta, .cta-inner, .legal-content, .gw-history, .clubs-strip, .stat-block, .pundit-layout, .stories-grid, .story-card, .origin-layout, .season-stats"
+    );
+    if (!els.length) return;
     els.forEach((el) => el.classList.add("reveal"));
+    // Page-top elements use CSS animation — remove reveal to avoid opacity conflict
+    document.querySelectorAll(
+      ".page-top .section-title, .page-top .section-lead, .page-top .deadline, .page-top .slip, .page-top .table-wrap, .page-top .demo-note"
+    ).forEach((el) => el.classList.remove("reveal"));
     const io = new IntersectionObserver((entries) => {
       entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
-    }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+    }, { threshold: 0.1, rootMargin: "0px 0px -30px 0px" });
     els.forEach((el) => io.observe(el));
   }
 
   // ============================================================
   //  Init
   // ============================================================
+  // ============================================================
+  //  Popular picks
+  // ============================================================
+  function renderPopularPicks() {
+    const grid = $("#popularGrid");
+    if (!grid) return;
+    grid.innerHTML = POPULAR.map((item) => {
+      const rows = item.picks.map((p) => `
+        <div class="pop-row">
+          <span class="pop-score">${p.score}</span>
+          <div class="pop-bar-wrap">
+            <div class="pop-bar" style="width:${p.pct}%"></div>
+          </div>
+          <span class="pop-pct">${p.pct}%</span>
+        </div>`).join("");
+      return `
+        <div class="pop-card">
+          <div class="pop-fixture">${item.fixture}</div>
+          ${rows}
+        </div>`;
+    }).join("");
+  }
+
   function init() {
     renderClubRow();
     renderLeaderboard();
+    renderHistory();
+    renderPopularPicks();
 
     const fixtures = $("#fixtures");
     if (fixtures) {
       fixtures.addEventListener("click", (e) => {
-        const btn = e.target.closest(".stepper button");
-        if (!btn) return;
-        const el = e.target.closest(".fixture");
-        step(el.dataset.id, btn.parentElement.dataset.side, parseInt(btn.dataset.d, 10));
+        const btn = e.target.closest(".score-btn");
+        if (btn) {
+          const el = e.target.closest(".fixture");
+          const control = btn.closest(".score-control");
+          step(el.dataset.id, control.dataset.side, parseInt(btn.dataset.d, 10));
+          return;
+        }
+        const chip = e.target.closest(".chip");
+        if (chip) {
+          const el = e.target.closest(".fixture");
+          const id = el.dataset.id;
+          const input = el.querySelector(".scorer-input");
+          el.querySelectorAll(".chip").forEach((c) => c.classList.remove("sel"));
+          chip.classList.add("sel");
+          if (chip.dataset.other) {
+            // Reveal the free-text input for a custom player.
+            if (input) {
+              input.hidden = false;
+              input.focus();
+              setScorerValue(id, input.value.trim());
+            }
+          } else {
+            if (input) input.hidden = true;
+            setScorerValue(id, chip.dataset.val);
+          }
+        }
       });
       fixtures.addEventListener("input", (e) => {
         const inp = e.target.closest(".scorer-input");
         if (!inp) return;
-        const id = inp.dataset.id;
-        const p = slip[id] || {};
-        if (inp.value.trim()) p.scorer = inp.value.trim(); else delete p.scorer;
-        slip[id] = p;
-        saveSlip();
-        markDone();
-        updateStatus();
+        setScorerValue(inp.dataset.id, inp.value.trim());
       });
       loadFixtures();
     }
@@ -366,8 +680,14 @@
     if (clearBtn) clearBtn.addEventListener("click", () => {
       FIXTURES.forEach((f) => { delete slip[f.id]; });
       saveSlip();
+      try { localStorage.removeItem(SUBMIT_KEY); } catch (e) {}
+      const submit = $("#submitBtn");
+      if (submit) submit.textContent = "Submit predictions";
+      const banner = $("#submittedBanner");
+      if (banner) banner.hidden = true;
       renderFixtures();
       updateStatus();
+      showToast("Slip cleared");
     });
 
     const submitBtn = $("#submitBtn");
@@ -376,6 +696,46 @@
     if (modalClose) modalClose.addEventListener("click", closeModal);
     const modal = $("#modal");
     if (modal) modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+
+    const shareBtn = $("#shareBtn");
+    if (shareBtn) shareBtn.addEventListener("click", () => {
+      const lines = ["My Super 7 predictions for GW34:"];
+      FIXTURES.forEach((f) => {
+        const p = slip[f.id] || {};
+        const h = Number.isInteger(p.h) ? p.h : 0;
+        const a = Number.isInteger(p.a) ? p.a : 0;
+        lines.push(`${f.home} ${h}–${a} ${f.away}`);
+      });
+      const scorerLines = FIXTURES
+        .map((f) => { const p = slip[f.id] || {}; return p.scorer ? `${f.super7 || f.home}: ${p.scorer}` : null; })
+        .filter(Boolean);
+      if (scorerLines.length) lines.push("First scorers: " + scorerLines.join(", "));
+      lines.push("Can you beat me? thesuper7.com");
+      const text = lines.join("\n");
+      const originalText = shareBtn.textContent;
+      const showCopied = () => {
+        shareBtn.textContent = "✓ Copied to clipboard";
+        setTimeout(() => { shareBtn.textContent = originalText; }, 2000);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(showCopied).catch(() => { prompt("Copy your predictions:", text); });
+      } else {
+        prompt("Copy your predictions:", text);
+      }
+    });
+
+    // FAQ open/close animation
+    document.querySelectorAll(".faq-item").forEach((details) => {
+      details.addEventListener("toggle", () => {
+        if (!details.open) return;
+        const content = details.querySelector("p");
+        if (!content) return;
+        content.animate(
+          [{ opacity: 0, transform: "translateY(-8px)" }, { opacity: 1, transform: "none" }],
+          { duration: 320, easing: "cubic-bezier(0.22, 1, 0.36, 1)", fill: "forwards" }
+        );
+      });
+    });
 
     // notify form (front-end only)
     const notifyForm = $("#notify");
@@ -404,6 +764,22 @@
 
     setupReveal();
     updateStatus();
+    initCookieBanner();
+  }
+
+  // ============================================================
+  //  Cookie consent banner
+  // ============================================================
+  function initCookieBanner() {
+    if (localStorage.getItem("s7.cookies")) return;
+    const banner = $("#cookieBanner");
+    if (!banner) return;
+    setTimeout(() => banner.classList.add("visible"), 800);
+    const dismiss = () => banner.classList.remove("visible");
+    const accept = $("#cookieAccept");
+    const essential = $("#cookieEssential");
+    if (accept) accept.addEventListener("click", () => { localStorage.setItem("s7.cookies", "all"); dismiss(); });
+    if (essential) essential.addEventListener("click", () => { localStorage.setItem("s7.cookies", "essential"); dismiss(); });
   }
 
   if (document.readyState === "loading") {

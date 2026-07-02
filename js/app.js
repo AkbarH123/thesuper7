@@ -125,10 +125,14 @@
   ];
 
   const STORE_KEY = "super7.slip.v3";
+  const SUBMIT_KEY = "super7.submitted.v1";
   const NOTIFY_KEY = "super7.notify";
+  const NO_SCORER = "No goalscorer";
 
   // ---- helpers ----
   const $ = (sel, root = document) => root.querySelector(sel);
+  const esc = (s) => String(s == null ? "" : s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   const codeFor = (name) => NAME_TO_CODE[(name || "").trim().toLowerCase()] || null;
   const meta = (name) => {
     const c = codeFor(name);
@@ -148,6 +152,7 @@
   }
   function saveSlip() {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(slip)); } catch (e) {}
+    showToast("Saved");
   }
 
   let slip = loadSlip();   // { [fixtureId]: { h, a, scorer } }
@@ -200,9 +205,24 @@
   // ============================================================
   //  Game: fixtures + predictions
   // ============================================================
+  function renderSkeletons() {
+    const wrap = $("#fixtures");
+    if (!wrap) return;
+    let html = "";
+    for (let i = 0; i < 7; i++) {
+      html += `<div class="fixture skeleton" aria-hidden="true">
+        <div class="sk-line sk-sm"></div>
+        <div class="sk-row"><div class="sk-dot"></div><div class="sk-line"></div><div class="sk-score"></div><div class="sk-line"></div><div class="sk-dot"></div></div>
+        <div class="sk-line sk-chips"></div>
+      </div>`;
+    }
+    wrap.innerHTML = html;
+  }
+
   async function loadFixtures() {
     const wrap = $("#fixtures");
     if (!wrap) return; // not the game page
+    renderSkeletons();
     try {
       const r = await fetch("/api/fixtures", { headers: { Accept: "application/json" } });
       if (!r.ok) throw new Error("status " + r.status);
@@ -218,6 +238,7 @@
     renderFixtures();
     startCountdown();
     updateStatus();
+    updateSubmittedBanner();
   }
 
   function badge(name) {
@@ -240,6 +261,24 @@
     return form.map((r) => `<span class="fdot fdot-${r.toLowerCase()}"></span>`).join("");
   }
 
+  // Tappable first-scorer chips (+ "No goal" and an "Other…" free-text input).
+  function scorerChips(f, s7code, pick) {
+    const players = SCORERS[s7code] || [];
+    const options = players.concat(NO_SCORER);
+    const isCustom = !!pick.scorer && options.indexOf(pick.scorer) === -1;
+    let html = `<div class="scorer-chips" role="group" aria-label="First scorer">`;
+    options.forEach((p) => {
+      const sel = pick.scorer === p ? " sel" : "";
+      const label = p === NO_SCORER ? "No goal" : p;
+      html += `<button type="button" class="chip${sel}" data-val="${esc(p)}">${esc(label)}</button>`;
+    });
+    html += `<button type="button" class="chip chip-other${isCustom ? " sel" : ""}" data-other="1">Other&hellip;</button>`;
+    html += `</div>`;
+    html += `<input class="scorer-input" data-id="${esc(f.id)}" placeholder="Type a player name"
+             value="${isCustom ? esc(pick.scorer) : ""}"${isCustom ? "" : " hidden"} />`;
+    return html;
+  }
+
   function renderFixtures() {
     const wrap = $("#fixtures");
     if (!wrap) return;
@@ -251,8 +290,6 @@
       const pick = slip[f.id] || {};
       const hv = Number.isInteger(pick.h) ? pick.h : 0;
       const av = Number.isInteger(pick.a) ? pick.a : 0;
-      const dl = (SCORERS[s7code] || []).concat("No goalscorer")
-        .map((p) => `<option value="${p}"></option>`).join("");
       const when = fixtureDateLabel(f);
       const done = isComplete(pick);
       const homeCode = codeFor(f.home);
@@ -291,13 +328,11 @@
           </div>
         </div>
         <div class="fixture-scorer">
-          <label for="scorer-${f.id}">
+          <label>
             <span class="scorer-badge" style="background:${clubAccent};color:${s7club ? s7club.text : "#fff"}">${s7code || "?"}</span>
             ${s7name} first scorer
           </label>
-          <input class="scorer-input" id="scorer-${f.id}" data-id="${f.id}" list="dl-${f.id}"
-                 placeholder="Type or select player&hellip;" value="${pick.scorer ? String(pick.scorer).replace(/"/g, "&quot;") : ""}" />
-          <datalist id="dl-${f.id}">${dl}</datalist>
+          ${scorerChips(f, s7code, pick)}
         </div>
         <div class="fixture-meta">
           <div class="fixture-forms">
@@ -353,6 +388,15 @@
     updateStatus();
   }
 
+  function setScorerValue(id, value) {
+    const p = slip[id] || {};
+    if (value) p.scorer = value; else delete p.scorer;
+    slip[id] = p;
+    saveSlip();
+    markDone();
+    updateStatus();
+  }
+
   function completeCount() {
     return FIXTURES.reduce((n, f) => n + (isComplete(slip[f.id]) ? 1 : 0), 0);
   }
@@ -372,6 +416,28 @@
       submit.disabled = !(n === total && total > 0);
       if (wasDisabled && !submit.disabled) pulseEl(submit);
     }
+    renderProgress(n, total);
+  }
+
+  function renderProgress(n, total) {
+    const track = $("#progressTrack");
+    if (!track) return;
+    if (track.children.length !== total) {
+      track.innerHTML = Array.from({ length: total }, () => `<span class="progress-seg"></span>`).join("");
+    }
+    Array.prototype.forEach.call(track.children, (seg, i) => {
+      seg.classList.toggle("filled", i < n);
+    });
+  }
+
+  // ---- submitted state ----
+  function updateSubmittedBanner() {
+    const banner = $("#submittedBanner");
+    const submit = $("#submitBtn");
+    let submitted = null;
+    try { submitted = JSON.parse(localStorage.getItem(SUBMIT_KEY)); } catch (e) {}
+    if (banner) banner.hidden = !submitted;
+    if (submit && submitted) submit.textContent = "Update predictions";
   }
 
   // ---- countdown to the first fixture (or next Saturday 3pm) ----
@@ -424,11 +490,55 @@
   // ============================================================
   //  Modal
   // ============================================================
+  function renderModalPicks() {
+    const ul = $("#modalPicks");
+    if (!ul) return;
+    ul.innerHTML = FIXTURES.map((f) => {
+      const p = slip[f.id] || {};
+      const h = Number.isInteger(p.h) ? p.h : "-";
+      const a = Number.isInteger(p.a) ? p.a : "-";
+      return `<li><span>${esc(abbr(f.home))} <strong>${h}&ndash;${a}</strong> ${esc(abbr(f.away))}</span>` +
+        `<span class="pick-scorer">${esc(p.scorer || "")}</span></li>`;
+    }).join("");
+  }
+
+  function burstConfetti() {
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const colors = ["#DCE140", "#E8ED5A", "#C7C8CA", "#FFFFFF"];
+    const holder = document.createElement("div");
+    holder.className = "confetti";
+    for (let i = 0; i < 70; i++) {
+      const s = document.createElement("span");
+      s.style.left = Math.random() * 100 + "vw";
+      s.style.background = colors[i % colors.length];
+      s.style.animationDuration = 1.8 + Math.random() * 1.6 + "s";
+      s.style.animationDelay = Math.random() * 0.4 + "s";
+      s.style.width = s.style.height = 5 + Math.random() * 6 + "px";
+      holder.appendChild(s);
+    }
+    document.body.appendChild(holder);
+    setTimeout(() => holder.remove(), 4200);
+  }
+
+  let toastTimer = null;
+  function showToast(msg) {
+    const t = $("#toast");
+    if (!t) return;
+    t.textContent = msg;
+    t.classList.add("show");
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("show"), 1400);
+  }
+
   function openModal() {
+    try { localStorage.setItem(SUBMIT_KEY, JSON.stringify({ at: Date.now() })); } catch (e) {}
+    updateSubmittedBanner();
+    renderModalPicks();
     const m = $("#modal");
     const txt = $("#modalText");
     if (txt) txt.textContent = "Your Super 7 slip is locked in. Good luck this gameweek.";
     if (m) { m.classList.add("open"); m.setAttribute("aria-hidden", "false"); }
+    burstConfetti();
   }
   function closeModal() {
     const m = $("#modal");
@@ -532,33 +642,36 @@
     if (fixtures) {
       fixtures.addEventListener("click", (e) => {
         const btn = e.target.closest(".score-btn");
-        if (!btn) return;
-        const el = e.target.closest(".fixture");
-        const control = btn.closest(".score-control");
-        step(el.dataset.id, control.dataset.side, parseInt(btn.dataset.d, 10));
+        if (btn) {
+          const el = e.target.closest(".fixture");
+          const control = btn.closest(".score-control");
+          step(el.dataset.id, control.dataset.side, parseInt(btn.dataset.d, 10));
+          return;
+        }
+        const chip = e.target.closest(".chip");
+        if (chip) {
+          const el = e.target.closest(".fixture");
+          const id = el.dataset.id;
+          const input = el.querySelector(".scorer-input");
+          el.querySelectorAll(".chip").forEach((c) => c.classList.remove("sel"));
+          chip.classList.add("sel");
+          if (chip.dataset.other) {
+            // Reveal the free-text input for a custom player.
+            if (input) {
+              input.hidden = false;
+              input.focus();
+              setScorerValue(id, input.value.trim());
+            }
+          } else {
+            if (input) input.hidden = true;
+            setScorerValue(id, chip.dataset.val);
+          }
+        }
       });
       fixtures.addEventListener("input", (e) => {
         const inp = e.target.closest(".scorer-input");
         if (!inp) return;
-        const id = inp.dataset.id;
-        const p = slip[id] || {};
-        if (inp.value.trim()) p.scorer = inp.value.trim(); else delete p.scorer;
-        slip[id] = p;
-        saveSlip();
-        markDone();
-        updateStatus();
-      });
-      fixtures.addEventListener("focusin", (e) => {
-        const inp = e.target.closest(".scorer-input");
-        if (!inp) return;
-        inp.dataset.prev = inp.value;
-        inp.value = "";
-      });
-      fixtures.addEventListener("focusout", (e) => {
-        const inp = e.target.closest(".scorer-input");
-        if (!inp) return;
-        if (!inp.value.trim()) inp.value = inp.dataset.prev || "";
-        delete inp.dataset.prev;
+        setScorerValue(inp.dataset.id, inp.value.trim());
       });
       loadFixtures();
     }
@@ -567,8 +680,14 @@
     if (clearBtn) clearBtn.addEventListener("click", () => {
       FIXTURES.forEach((f) => { delete slip[f.id]; });
       saveSlip();
+      try { localStorage.removeItem(SUBMIT_KEY); } catch (e) {}
+      const submit = $("#submitBtn");
+      if (submit) submit.textContent = "Submit predictions";
+      const banner = $("#submittedBanner");
+      if (banner) banner.hidden = true;
       renderFixtures();
       updateStatus();
+      showToast("Slip cleared");
     });
 
     const submitBtn = $("#submitBtn");
