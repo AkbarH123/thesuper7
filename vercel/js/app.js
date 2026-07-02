@@ -128,6 +128,34 @@
   const SUBMIT_KEY = "super7.submitted.v1";
   const NOTIFY_KEY = "super7.notify";
   const NO_SCORER = "No goalscorer";
+  const OWN_GOAL = "Own goal";
+  const ENTRY_CUTOFF_MS = 3600000; // entries close 1 hour before first kickoff
+
+  // Demo squad lists for opponents (used when the API can't provide squads).
+  const FALLBACK_SQUADS = {
+    "aston villa":     ["Watkins", "Rogers", "Bailey", "Tielemans", "McGinn", "Ramsey"],
+    "brighton":        ["João Pedro", "Mitoma", "Welbeck", "Adingra", "Rutter", "O'Riley"],
+    "everton":         ["Calvert-Lewin", "Ndiaye", "McNeil", "Doucouré", "Beto", "Harrison"],
+    "wolves":          ["Cunha", "Strand Larsen", "Hwang", "Sarabia", "Bellegarde", "Aït-Nouri"],
+    "fulham":          ["Jiménez", "Iwobi", "Muniz", "Wilson", "Smith Rowe", "Traoré"],
+    "brentford":       ["Mbeumo", "Wissa", "Schade", "Damsgaard", "Lewis-Potter", "Janelt"],
+    "crystal palace":  ["Mateta", "Eze", "Sarr", "Kamada", "Muñoz", "Hughes"],
+  };
+
+  // Season-long demo standings for the leaderboard's second tab.
+  const SEASON_LEADERBOARD = [
+    { name: "KopEndKid",      exact: 41, pts: 402 },
+    { name: "GoonerGuru",     exact: 38, pts: 391 },
+    { name: "Pep_Roulette",   exact: 35, pts: 356 },
+    { name: "BlueMoonRising", exact: 33, pts: 340 },
+    { name: "TooneToon",      exact: 29, pts: 311 },
+    { name: "SpursTilIDie",   exact: 27, pts: 296 },
+    { name: "StamfordSam",    exact: 24, pts: 270 },
+    { name: "RedDevil_07",    exact: 22, pts: 255 },
+  ];
+
+  // Live demo mode: append ?demoLive=1 to the game URL to simulate matchday.
+  const DEMO_LIVE = /[?&#]demo-?[Ll]ive/.test(location.search + location.hash);
 
   // ---- helpers ----
   const $ = (sel, root = document) => root.querySelector(sel);
@@ -261,22 +289,54 @@
     return form.map((r) => `<span class="fdot fdot-${r.toLowerCase()}"></span>`).join("");
   }
 
-  // Tappable first-scorer chips (+ "No goal" and an "Other…" free-text input).
-  function scorerChips(f, s7code, pick) {
-    const players = SCORERS[s7code] || [];
-    const options = players.concat(NO_SCORER);
-    const isCustom = !!pick.scorer && options.indexOf(pick.scorer) === -1;
-    let html = `<div class="scorer-chips" role="group" aria-label="First scorer">`;
-    options.forEach((p) => {
-      const sel = pick.scorer === p ? " sel" : "";
-      const label = p === NO_SCORER ? "No goal" : p;
-      html += `<button type="button" class="chip${sel}" data-val="${esc(p)}">${esc(label)}</button>`;
+  // ---- First scorer: pick ONE player from EITHER team (or Own goal / No goal) ----
+  const SIDE_CHOICE = {}; // fixtureId -> "home" | "away" (UI tab state)
+
+  function squadFor(f, side) {
+    const teamName = side === "home" ? f.home : f.away;
+    // Prefer real squad data from the API.
+    if (f.squads && Array.isArray(f.squads[side]) && f.squads[side].length) {
+      return f.squads[side].slice(0, 10);
+    }
+    // Fall back to our curated lists (Super 7 clubs + demo opponents).
+    const code = codeFor(teamName);
+    if (code && SCORERS[code]) return SCORERS[code];
+    const fb = FALLBACK_SQUADS[(teamName || "").trim().toLowerCase()];
+    return fb || [];
+  }
+
+  function activeSide(f, pick) {
+    if (SIDE_CHOICE[f.id]) return SIDE_CHOICE[f.id];
+    // If the saved pick belongs to the away squad, open that tab.
+    if (pick.scorer && squadFor(f, "away").indexOf(pick.scorer) !== -1) return "away";
+    return "home";
+  }
+
+  function scorerArea(f, pick) {
+    const side = activeSide(f, pick);
+    const players = squadFor(f, side);
+    const specials = [OWN_GOAL, NO_SCORER];
+    const known = squadFor(f, "home").concat(squadFor(f, "away")).concat(specials);
+    const isCustom = !!pick.scorer && known.indexOf(pick.scorer) === -1;
+    let html = `<div class="side-tabs" role="tablist" aria-label="Pick a team">`;
+    ["home", "away"].forEach((s) => {
+      const team = s === "home" ? f.home : f.away;
+      html += `<button type="button" class="side-tab${s === side ? " active" : ""}" data-tabside="${s}">${esc(abbr(team))} ${esc(team)}</button>`;
     });
+    html += `</div>`;
+    html += `<div class="scorer-chips" role="group" aria-label="First scorer">`;
+    players.forEach((p) => {
+      html += `<button type="button" class="chip${pick.scorer === p ? " sel" : ""}" data-val="${esc(p)}">${esc(p)}</button>`;
+    });
+    html += `</div>`;
+    html += `<div class="scorer-chips scorer-specials">`;
+    html += `<button type="button" class="chip chip-og${pick.scorer === OWN_GOAL ? " sel" : ""}" data-val="${esc(OWN_GOAL)}">Own goal</button>`;
+    html += `<button type="button" class="chip${pick.scorer === NO_SCORER ? " sel" : ""}" data-val="${esc(NO_SCORER)}">No goal</button>`;
     html += `<button type="button" class="chip chip-other${isCustom ? " sel" : ""}" data-other="1">Other&hellip;</button>`;
     html += `</div>`;
-    html += `<input class="scorer-input" data-id="${esc(f.id)}" placeholder="Type a player name"
+    html += `<input class="scorer-input" data-id="${esc(f.id)}" placeholder="Type a player from either team"
              value="${isCustom ? esc(pick.scorer) : ""}"${isCustom ? "" : " hidden"} />`;
-    return html;
+    return `<div class="scorer-area" data-id="${esc(f.id)}">${html}</div>`;
   }
 
   function renderFixtures() {
@@ -327,12 +387,13 @@
             <span class="team-name">${f.away}</span>
           </div>
         </div>
+        <div class="fixture-live" data-id="${f.id}" hidden></div>
         <div class="fixture-scorer">
           <label>
             <span class="scorer-badge" style="background:${clubAccent};color:${s7club ? s7club.text : "#fff"}">${s7code || "?"}</span>
-            ${s7name} first scorer
+            First goalscorer of the match
           </label>
-          ${scorerChips(f, s7code, pick)}
+          ${scorerArea(f, pick)}
         </div>
         <div class="fixture-meta">
           <div class="fixture-forms">
@@ -372,6 +433,7 @@
   }
 
   function step(id, side, delta) {
+    if (isLocked()) return;
     const p = slip[id] || {};
     let v = Number.isInteger(p[side]) ? p[side] : 0;
     v = Math.max(0, Math.min(15, v + delta));
@@ -389,6 +451,7 @@
   }
 
   function setScorerValue(id, value) {
+    if (isLocked()) return;
     const p = slip[id] || {};
     if (value) p.scorer = value; else delete p.scorer;
     slip[id] = p;
@@ -401,22 +464,65 @@
     return FIXTURES.reduce((n, f) => n + (isComplete(slip[f.id]) ? 1 : 0), 0);
   }
 
+  // ---- lock rules: submitted slips are FINAL; entries close 1h before KO ----
+  function gwKey() {
+    return FIXTURES.map((f) => f.id).join("|");
+  }
+  function getSubmitted() {
+    let s = null;
+    try { s = JSON.parse(localStorage.getItem(SUBMIT_KEY)); } catch (e) {}
+    // A submission only counts for the gameweek it was made for.
+    if (s && FIXTURES.length && s.gw !== gwKey()) return null;
+    return s;
+  }
+  function entriesClosed() {
+    if (DEMO_LIVE) return true;
+    return deadlineTs != null && Date.now() >= deadlineTs;
+  }
+  function isLocked() {
+    return !!getSubmitted() || entriesClosed();
+  }
+
+  function applyLockUI() {
+    const locked = isLocked();
+    const slipEl = $(".slip");
+    if (slipEl) slipEl.classList.toggle("locked", locked);
+    document.querySelectorAll("#fixtures .score-btn, #fixtures .chip, #fixtures .side-tab").forEach((b) => {
+      b.disabled = locked;
+    });
+    document.querySelectorAll("#fixtures .scorer-input").forEach((i) => { i.disabled = locked; });
+    const clearBtn = $("#clearBtn");
+    if (clearBtn) clearBtn.hidden = locked;
+    const submit = $("#submitBtn");
+    if (submit) submit.hidden = locked;
+  }
+
   function updateStatus() {
     const total = FIXTURES.length || 7;
     const n = completeCount();
     const status = $("#slipStatus");
     const submit = $("#submitBtn");
+    const submitted = getSubmitted();
     if (status) {
-      status.textContent = `${n} / ${total} predictions complete` +
-        (n < total ? ", add scores and first scorers" : ", ready to submit");
-      status.classList.toggle("ready", n === total && total > 0);
+      if (submitted) {
+        status.textContent = "Slip submitted. Final — no amendments.";
+        status.classList.add("ready");
+      } else if (entriesClosed()) {
+        status.textContent = "Entries are closed for this gameweek.";
+        status.classList.remove("ready");
+      } else {
+        status.textContent = `${n} / ${total} predictions complete` +
+          (n < total ? ", add scores and first scorers" : ", ready to submit");
+        status.classList.toggle("ready", n === total && total > 0);
+      }
     }
     if (submit) {
       const wasDisabled = submit.disabled;
-      submit.disabled = !(n === total && total > 0);
+      submit.disabled = isLocked() || !(n === total && total > 0);
       if (wasDisabled && !submit.disabled) pulseEl(submit);
     }
     renderProgress(n, total);
+    applyLockUI();
   }
 
   function renderProgress(n, total) {
@@ -433,33 +539,52 @@
   // ---- submitted state ----
   function updateSubmittedBanner() {
     const banner = $("#submittedBanner");
-    const submit = $("#submitBtn");
-    let submitted = null;
-    try { submitted = JSON.parse(localStorage.getItem(SUBMIT_KEY)); } catch (e) {}
-    if (banner) banner.hidden = !submitted;
-    if (submit && submitted) submit.textContent = "Update predictions";
+    const submitted = getSubmitted();
+    if (banner) {
+      banner.hidden = !(submitted || entriesClosed());
+      const p = banner.querySelector("p");
+      if (p) {
+        p.textContent = submitted
+          ? "Your slip is in. Submitted score cards are final — no amendments."
+          : "Entries are closed for this gameweek. Predictions lock one hour before the first kickoff.";
+      }
+    }
   }
 
-  // ---- countdown to the first fixture (or next Saturday 3pm) ----
+  // ---- countdown: entries close 1 HOUR before the first kickoff ----
   let deadlineTs = null;
   function computeDeadline() {
     const times = FIXTURES
       .map((f) => Date.parse(`${f.date}T${f.time || "15:00:00"}Z`))
       .filter((t) => isFinite(t));
-    if (times.length) { deadlineTs = Math.min.apply(null, times); return; }
+    if (times.length) { deadlineTs = Math.min.apply(null, times) - ENTRY_CUTOFF_MS; return; }
     const now = new Date();
     const d = new Date(now);
     d.setDate(now.getDate() + ((6 - now.getDay() + 7) % 7));
     d.setHours(15, 0, 0, 0);
     if (d <= now) d.setDate(d.getDate() + 7);
-    deadlineTs = d.getTime();
+    deadlineTs = d.getTime() - ENTRY_CUTOFF_MS;
   }
   let countdownTimer = null;
+  let closedApplied = false;
   function startCountdown() {
     const el = $("#timer");
     if (!el) return;
     computeDeadline();
+    const label = document.querySelector(".deadline-label");
+    if (label) label.textContent = "Entries close";
     const tick = () => {
+      if (entriesClosed()) {
+        el.textContent = "CLOSED";
+        el.classList.add("urgent");
+        if (!closedApplied) {
+          closedApplied = true;
+          updateStatus();
+          updateSubmittedBanner();
+          startLiveUpdates();
+        }
+        return;
+      }
       let diff = Math.max(0, deadlineTs - Date.now());
       const dd = Math.floor(diff / 86400000); diff -= dd * 86400000;
       const hh = Math.floor(diff / 3600000);  diff -= hh * 3600000;
@@ -475,16 +600,209 @@
   }
 
   // ============================================================
-  //  Leaderboard
+  //  Live matchday: pulls scores and paints them onto the slip
   // ============================================================
+  let liveTimer = null;
+  let liveState = null; // { [fixtureId]: { hs, as, status, minute } }
+  let demoSim = null;
+
+  function startLiveUpdates() {
+    const onGamePage = !!$("#fixtures");
+    if (!onGamePage || liveTimer) return;
+    if (DEMO_LIVE) { startDemoSim(); return; }
+    const realIds = FIXTURES.map((f) => f.id).filter((id) => /^\d+$/.test(String(id)));
+    if (!realIds.length) return; // demo fixtures: nothing to poll
+    const poll = async () => {
+      try {
+        const r = await fetch(`/api/live?ids=${realIds.join(",")}`, { headers: { Accept: "application/json" } });
+        if (!r.ok) return;
+        const data = await r.json();
+        if (data && Array.isArray(data.scores)) {
+          liveState = {};
+          data.scores.forEach((s) => { liveState[s.id] = s; });
+          renderLive();
+        }
+      } catch (e) { /* keep last state */ }
+    };
+    poll();
+    liveTimer = setInterval(poll, 60000);
+  }
+
+  function startDemoSim() {
+    liveState = {};
+    FIXTURES.forEach((f, i) => {
+      liveState[f.id] = { hs: 0, as: 0, status: "1H", minute: "1'", _m: 1 + i };
+    });
+    renderLive();
+    demoSim = setInterval(() => {
+      let allDone = true;
+      FIXTURES.forEach((f) => {
+        const s = liveState[f.id];
+        if (s.status === "Match Finished") return;
+        allDone = false;
+        s._m += 4;
+        if (Math.random() < 0.09) s.hs += 1;
+        if (Math.random() < 0.08) s.as += 1;
+        if (s._m >= 90) { s.status = "Match Finished"; s.minute = "FT"; }
+        else if (s._m >= 45 && s._m < 49) { s.status = "HT"; s.minute = "HT"; }
+        else { s.status = "1H"; s.minute = Math.min(90, s._m) + "'"; }
+      });
+      renderLive();
+      if (allDone && demoSim) { clearInterval(demoSim); demoSim = null; }
+    }, 2500);
+  }
+
+  function verdictFor(pick, s) {
+    if (!pick || !Number.isInteger(pick.h) || !Number.isInteger(pick.a)) return "";
+    if (s.hs == null || s.as == null) return "";
+    if (pick.h === s.hs && pick.a === s.as) return "v-exact";
+    const pr = Math.sign(pick.h - pick.a);
+    const sr = Math.sign(s.hs - s.as);
+    if (pr === sr) return "v-result";
+    return s.status === "Match Finished" ? "v-miss" : "v-off";
+  }
+
+  function renderLive() {
+    if (!liveState) return;
+    let pts = 0;
+    let anyLive = false;
+    FIXTURES.forEach((f) => {
+      const s = liveState[f.id];
+      const strip = document.querySelector(`.fixture-live[data-id="${f.id}"]`);
+      const card = document.querySelector(`.fixture[data-id="${f.id}"]`);
+      if (!s || !strip || !card) return;
+      const inPlay = s.status && s.status !== "Match Finished" && s.status !== "Not Started" && s.status !== "NS" && s.status !== "Unknown" && s.status !== "";
+      const finished = s.status === "Match Finished";
+      if (s.hs == null && s.as == null && !inPlay) { strip.hidden = true; return; }
+      anyLive = anyLive || inPlay;
+      strip.hidden = false;
+      strip.innerHTML =
+        `<span class="live-dot${finished ? " ft" : ""}"></span>` +
+        `<span class="live-score">${s.hs == null ? "-" : s.hs}&ndash;${s.as == null ? "-" : s.as}</span>` +
+        `<span class="live-min">${finished ? "FT" : esc(s.minute || s.status || "")}</span>`;
+      card.classList.remove("v-exact", "v-result", "v-miss", "v-off");
+      const v = verdictFor(slip[f.id], s);
+      if (v) card.classList.add(v);
+      if (v === "v-exact") pts += 5;
+      else if (v === "v-result") pts += 2;
+    });
+    const status = $("#slipStatus");
+    if (status && getSubmitted()) {
+      status.innerHTML = `<strong>${anyLive ? "Live" : "Latest"}: ${pts} pts</strong> from your slip` +
+        (anyLive ? " &middot; scores update automatically" : "");
+      status.classList.add("ready");
+    }
+  }
+
+  // ============================================================
+  //  Leaderboard — interactive (tabs, search, sort, podium, count-up)
+  // ============================================================
+  function animateNum(el, target, prefix) {
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const pre = prefix || "";
+    if (reduce) { el.textContent = pre + target.toLocaleString(); return; }
+    const dur = 700;
+    const start = performance.now();
+    const from = 0;
+    const frame = (t) => {
+      const k = Math.min(1, (t - start) / dur);
+      const eased = 1 - Math.pow(1 - k, 3);
+      el.textContent = pre + Math.round(from + (target - from) * eased).toLocaleString();
+      if (k < 1) requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+  }
+
+  const lbState = { set: "gw", sortKey: "pts", sortDir: -1, q: "" };
+
+  function lbData() {
+    const rows = (lbState.set === "season" ? SEASON_LEADERBOARD : LEADERBOARD).slice();
+    // Rank is always by points before search/sort so #1 stays #1 when filtering.
+    const byPts = rows.slice().sort((a, b) => b.pts - a.pts);
+    rows.forEach((r) => { r.rank = byPts.indexOf(r) + 1; });
+    let out = rows;
+    if (lbState.q) {
+      const q = lbState.q.toLowerCase();
+      out = out.filter((r) => r.name.toLowerCase().includes(q));
+    }
+    const k = lbState.sortKey;
+    out.sort((a, b) => {
+      const va = k === "name" ? a.name.toLowerCase() : a[k];
+      const vb = k === "name" ? b.name.toLowerCase() : b[k];
+      return (va < vb ? -1 : va > vb ? 1 : 0) * lbState.sortDir;
+    });
+    return out;
+  }
+
+  function renderPodium() {
+    const podium = $("#podium");
+    if (!podium) return;
+    const top3 = (lbState.set === "season" ? SEASON_LEADERBOARD : LEADERBOARD)
+      .slice().sort((a, b) => b.pts - a.pts).slice(0, 3);
+    if (top3.length < 3) { podium.innerHTML = ""; return; }
+    const order = [top3[1], top3[0], top3[2]]; // visual: 2nd, 1st, 3rd
+    const places = [2, 1, 3];
+    podium.innerHTML = order.map((r, i) => `
+      <div class="podium-card place-${places[i]}">
+        <span class="podium-rank">${places[i]}</span>
+        <span class="podium-avatar">${esc(r.name.slice(0, 2).toUpperCase())}</span>
+        <span class="podium-name">${esc(r.name)}</span>
+        <span class="podium-pts" data-pts="${r.pts}">0</span>
+        <span class="podium-sub">${r.exact} exact</span>
+      </div>`).join("");
+    podium.querySelectorAll(".podium-pts").forEach((el) => {
+      animateNum(el, parseInt(el.dataset.pts, 10));
+    });
+  }
+
   function renderLeaderboard() {
     const body = $("#leaderboardBody");
     if (!body) return;
-    body.innerHTML = LEADERBOARD.map((r, i) => {
-      const rank = i + 1;
-      const podiumCls = rank <= 3 ? ` class="lb-podium lb-pos-${rank}"` : "";
-      return `<tr${podiumCls} style="animation-delay:${0.04 + i * 0.06}s"><td class="lb-rank">${rank}</td><td>${r.name}</td><td>${r.exact}</td><td class="num">${r.pts}</td></tr>`;
-    }).join("");
+    const rows = lbData();
+    body.innerHTML = rows.map((r, i) => {
+      const podiumCls = r.rank <= 3 ? ` class="lb-podium lb-pos-${r.rank}"` : "";
+      return `<tr${podiumCls} style="animation-delay:${0.03 + i * 0.05}s">` +
+        `<td class="lb-rank">${r.rank}</td><td>${esc(r.name)}</td><td>${r.exact}</td>` +
+        `<td class="num" data-pts="${r.pts}">${r.pts}</td></tr>`;
+    }).join("") || `<tr><td colspan="4" class="lb-empty">No players match that search.</td></tr>`;
+    // Sort indicators on headers.
+    document.querySelectorAll(".leaderboard thead th[data-sort]").forEach((th) => {
+      th.classList.toggle("sorted", th.dataset.sort === lbState.sortKey);
+      th.classList.toggle("desc", th.dataset.sort === lbState.sortKey && lbState.sortDir === -1);
+    });
+  }
+
+  function initLeaderboardControls() {
+    const tabs = $("#lbTabs");
+    if (tabs) {
+      tabs.addEventListener("click", (e) => {
+        const tab = e.target.closest(".lb-tab");
+        if (!tab) return;
+        tabs.querySelectorAll(".lb-tab").forEach((t) => t.classList.remove("active"));
+        tab.classList.add("active");
+        lbState.set = tab.dataset.set;
+        renderPodium();
+        renderLeaderboard();
+        const pts = document.querySelectorAll(".leaderboard td.num");
+        pts.forEach((el) => animateNum(el, parseInt(el.dataset.pts, 10)));
+      });
+    }
+    const search = $("#lbSearch");
+    if (search) {
+      search.addEventListener("input", () => {
+        lbState.q = search.value.trim();
+        renderLeaderboard();
+      });
+    }
+    document.querySelectorAll(".leaderboard thead th[data-sort]").forEach((th) => {
+      th.addEventListener("click", () => {
+        const key = th.dataset.sort;
+        if (lbState.sortKey === key) lbState.sortDir *= -1;
+        else { lbState.sortKey = key; lbState.sortDir = key === "name" ? 1 : -1; }
+        renderLeaderboard();
+      });
+    });
+    renderPodium();
   }
 
   // ============================================================
@@ -531,12 +849,14 @@
   }
 
   function openModal() {
-    try { localStorage.setItem(SUBMIT_KEY, JSON.stringify({ at: Date.now() })); } catch (e) {}
+    // Submitting is FINAL for the gameweek: no amendments once the card is in.
+    try { localStorage.setItem(SUBMIT_KEY, JSON.stringify({ at: Date.now(), gw: gwKey() })); } catch (e) {}
     updateSubmittedBanner();
+    updateStatus(); // locks the slip UI
     renderModalPicks();
     const m = $("#modal");
     const txt = $("#modalText");
-    if (txt) txt.textContent = "Your Super 7 slip is locked in. Good luck this gameweek.";
+    if (txt) txt.textContent = "Your score card is in — and it's final. No amendments. Good luck this gameweek.";
     if (m) { m.classList.add("open"); m.setAttribute("aria-hidden", "false"); }
     burstConfetti();
   }
@@ -632,20 +952,97 @@
     }).join("");
   }
 
+  // ============================================================
+  //  Page life: count-ups, tilt, scroll progress, header state
+  // ============================================================
+  function setupPageLife() {
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // Scroll progress bar (site-wide) + header shadow state.
+    const bar = document.createElement("div");
+    bar.id = "scrollProgress";
+    document.body.appendChild(bar);
+    const header = document.querySelector(".site-header");
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const doc = document.documentElement;
+        const max = doc.scrollHeight - window.innerHeight;
+        bar.style.width = (max > 0 ? (window.scrollY / max) * 100 : 0) + "%";
+        if (header) header.classList.toggle("scrolled", window.scrollY > 8);
+        ticking = false;
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+
+    // Jackpot count-up when it scrolls into view (landing page).
+    const jackpot = document.querySelector(".jackpot-amount");
+    if (jackpot && "IntersectionObserver" in window) {
+      const target = parseInt(jackpot.textContent.replace(/[^0-9]/g, ""), 10);
+      if (target && !reduce) {
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach((en) => {
+            if (!en.isIntersecting) return;
+            animateNum(jackpot, target, "£");
+            io.disconnect();
+          });
+        }, { threshold: 0.4 });
+        io.observe(jackpot);
+      }
+    }
+
+    // Subtle 3D tilt on the hero shields (fine pointers only).
+    const finePointer = window.matchMedia && window.matchMedia("(pointer: fine)").matches;
+    if (finePointer && !reduce) {
+      const row = document.querySelector(".club-row");
+      if (row) {
+        row.addEventListener("pointermove", (e) => {
+          const shield = e.target.closest(".shield");
+          if (!shield) return;
+          const r = shield.getBoundingClientRect();
+          const x = (e.clientX - r.left) / r.width - 0.5;
+          const y = (e.clientY - r.top) / r.height - 0.5;
+          shield.style.transform = `translateY(-6px) scale(1.05) rotateY(${x * 10}deg) rotateX(${-y * 10}deg)`;
+        });
+        row.addEventListener("pointerout", (e) => {
+          const shield = e.target.closest(".shield");
+          if (shield) shield.style.transform = "";
+        });
+      }
+    }
+  }
+
   function init() {
     renderClubRow();
     renderLeaderboard();
+    initLeaderboardControls();
     renderHistory();
     renderPopularPicks();
+    setupPageLife();
 
     const fixtures = $("#fixtures");
     if (fixtures) {
       fixtures.addEventListener("click", (e) => {
+        if (isLocked()) return;
         const btn = e.target.closest(".score-btn");
         if (btn) {
           const el = e.target.closest(".fixture");
           const control = btn.closest(".score-control");
           step(el.dataset.id, control.dataset.side, parseInt(btn.dataset.d, 10));
+          return;
+        }
+        const tab = e.target.closest(".side-tab");
+        if (tab) {
+          // Switch which team's squad is showing for this fixture.
+          const el = e.target.closest(".fixture");
+          const id = el.dataset.id;
+          SIDE_CHOICE[id] = tab.dataset.tabside;
+          const f = FIXTURES.find((x) => String(x.id) === String(id));
+          const area = el.querySelector(".scorer-area");
+          if (f && area) area.outerHTML = scorerArea(f, slip[id] || {});
           return;
         }
         const chip = e.target.closest(".chip");
@@ -678,13 +1075,9 @@
 
     const clearBtn = $("#clearBtn");
     if (clearBtn) clearBtn.addEventListener("click", () => {
+      if (isLocked()) return; // submitted cards are final
       FIXTURES.forEach((f) => { delete slip[f.id]; });
       saveSlip();
-      try { localStorage.removeItem(SUBMIT_KEY); } catch (e) {}
-      const submit = $("#submitBtn");
-      if (submit) submit.textContent = "Submit predictions";
-      const banner = $("#submittedBanner");
-      if (banner) banner.hidden = true;
       renderFixtures();
       updateStatus();
       showToast("Slip cleared");

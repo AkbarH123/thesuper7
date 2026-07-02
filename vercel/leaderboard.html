@@ -1,17 +1,31 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Leaderboard | The Super 7</title>
-  <meta name="description" content="The Super 7 gameweek leaderboard: see the top predictors and where you stand." />
+  <title>Leaderboard | The Super 7 — Top Football Predictors This Gameweek</title>
+  <meta name="description" content="The Super 7 leaderboard: see this gameweek's top football predictors, points standings, and where you rank. Updated after every result." />
   <link rel="canonical" href="https://www.thesuper7.com/leaderboard" />
   <meta name="robots" content="index, follow" />
   <meta name="theme-color" content="#1A1B1D" />
+
+  <!-- Open Graph / social sharing -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="The Super 7" />
+  <meta property="og:title" content="Leaderboard | The Super 7" />
+  <meta property="og:description" content="See this gameweek's top Super 7 predictors and the current standings. Free football prediction game." />
+  <meta property="og:url" content="https://www.thesuper7.com/leaderboard" />
+  <meta property="og:image" content="https://www.thesuper7.com/brand/assets/logo.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@_TheSuper7_" />
+  <meta name="twitter:title" content="Leaderboard | The Super 7" />
+  <meta name="twitter:description" content="This gameweek's top football predictors. Can you make the Super 7 leaderboard?" />
+  <meta name="twitter:image" content="https://www.thesuper7.com/brand/assets/logo.png" />
+
   <link rel="icon" href="brand/assets/logo.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
@@ -19,15 +33,16 @@
   <!-- ===== Header ===== -->
   <header class="site-header" id="top">
     <div class="container header-inner">
-      <a class="brand" href="index.html">
+      <a class="brand" href="/">
         <img src="brand/assets/logo.png" alt="The Super 7" class="brand-mark" />
+        <span class="brand-word"><span class="brand-the">THE</span> <span class="brand-s7">SUPER 7</span></span>
       </a>
       <nav class="nav" id="nav">
-        <a href="index.html#how">How it works</a>
-        <a href="game.html">Play</a>
-        <a href="index.html#prizes">Prizes</a>
-        <a href="leaderboard.html">Leaderboard</a>
-        <a href="index.html#faq">FAQ</a>
+        <a href="/#how">How it works</a>
+        <a href="/game">Play</a>
+        <a href="/#prizes">Prizes</a>
+        <a href="/leaderboard">Leaderboard</a>
+        <a href="/#faq">FAQ</a>
       </nav>
       <div class="header-actions">
         <a class="social social-sm" href="https://x.com/_TheSuper7_" target="_blank" rel="noopener" aria-label="The Super 7 on X">
@@ -35,10 +50,10 @@
             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
           </svg>
         </a>
-        <a href="game.html" class="btn btn-ghost">Play</a>
-        <a href="index.html#notify" class="btn btn-primary">Notify me</a>
+        <a href="#" class="btn btn-ghost">Log in</a>
+        <a href="#" class="btn btn-primary">Sign up</a>
       </div>
-      <button class="menu-toggle" id="menuToggle" aria-label="Menu">☰</button>
+      <button class="menu-toggle" id="menuToggle" aria-label="Menu">&#9776;</button>
     </div>
   </header>
 
@@ -46,18 +61,34 @@
   <main class="section page-top">
     <div class="container">
       <h1 class="section-title">Leaderboard</h1>
-      <p class="section-lead">Gameweek 34 top predictors</p>
+      <p class="section-lead">The sharpest predictors in the game</p>
+
+      <div class="lb-controls">
+        <div class="lb-tabs" role="tablist" id="lbTabs">
+          <button class="lb-tab active" type="button" data-set="gw">Gameweek 34</button>
+          <button class="lb-tab" type="button" data-set="season">Season</button>
+        </div>
+        <input id="lbSearch" class="lb-search" type="search" placeholder="Search players" aria-label="Search players" />
+      </div>
+
+      <div class="podium" id="podium"><!-- top 3, injected by JS --></div>
+
       <div class="table-wrap">
         <table class="leaderboard">
           <thead>
-            <tr><th>#</th><th>Player</th><th>Exact</th><th class="num">Points</th></tr>
+            <tr>
+              <th>#</th>
+              <th data-sort="name" title="Sort by name">Player</th>
+              <th data-sort="exact" title="Sort by exact scores">Exact</th>
+              <th class="num" data-sort="pts" title="Sort by points">Points</th>
+            </tr>
           </thead>
           <tbody id="leaderboardBody"><!-- injected by JS --></tbody>
         </table>
       </div>
       <p class="demo-note">Preview standings. Live leaderboards arrive when the game launches.</p>
       <div class="section-cta">
-        <a href="game.html" class="btn btn-primary btn-lg">Make your predictions</a>
+        <a href="/game" class="btn btn-primary btn-lg">Make your predictions</a>
       </div>
     </div>
   </main>
@@ -69,12 +100,14 @@
         <img src="brand/assets/logo.png" alt="The Super 7" class="brand-mark" />
       </div>
       <nav class="footer-nav">
-        <a href="index.html#how">How it works</a>
-        <a href="game.html">Play</a>
-        <a href="index.html#prizes">Prizes</a>
-        <a href="leaderboard.html">Leaderboard</a>
-        <a href="index.html#faq">FAQ</a>
-        <a href="rules.html">Rules &amp; T&amp;Cs</a>
+        <a href="/#how">How it works</a>
+        <a href="/game">Play</a>
+        <a href="/#prizes">Prizes</a>
+        <a href="/leaderboard">Leaderboard</a>
+        <a href="/#faq">FAQ</a>
+        <a href="/rules">Rules &amp; T&amp;Cs</a>
+        <a href="/terms">Terms</a>
+        <a href="/privacy">Privacy</a>
       </nav>
       <div class="socials">
         <a class="social" href="https://x.com/_TheSuper7_" target="_blank" rel="noopener" aria-label="The Super 7 on X (Twitter)">
@@ -82,10 +115,29 @@
             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
           </svg>
         </a>
+        <a class="social" href="https://www.youtube.com/@thesuper7official" target="_blank" rel="noopener" aria-label="The Super 7 on YouTube">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
+            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+          </svg>
+        </a>
       </div>
-      <p class="footer-legal">© <span id="year"></span> The Super 7. Free to play. 18+. Preview site. Not affiliated with any club or league.</p>
+      <p class="footer-legal">&copy; <span id="year"></span> The Super 7. THE SUPER 7&trade; and the logo are trademarks of The Super 7. Free to play. 18+. Not affiliated with any club or league. &middot; <a href="/privacy">Privacy</a> &middot; <a href="/terms">Terms</a></p>
     </div>
   </footer>
+
+  <!-- ===== Cookie banner ===== -->
+  <div class="cookie-banner" id="cookieBanner" role="dialog" aria-label="Cookie preferences">
+    <div class="cookie-inner container">
+      <div class="cookie-text">
+        <strong>Cookies &amp; Privacy</strong>
+        <p>We use essential cookies to keep the site working. With your consent we may also use analytics cookies to improve your experience. <a href="/privacy">Privacy Policy</a></p>
+      </div>
+      <div class="cookie-actions">
+        <button class="btn btn-ghost" id="cookieEssential">Essential only</button>
+        <button class="btn btn-primary" id="cookieAccept">Accept all</button>
+      </div>
+    </div>
+  </div>
 
   <script src="js/app.js"></script>
 </body>

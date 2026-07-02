@@ -61,11 +61,27 @@
   <main class="section page-top">
     <div class="container">
       <h1 class="section-title">Leaderboard</h1>
-      <p class="section-lead">Gameweek 34 top predictors</p>
+      <p class="section-lead">The sharpest predictors in the game</p>
+
+      <div class="lb-controls">
+        <div class="lb-tabs" role="tablist" id="lbTabs">
+          <button class="lb-tab active" type="button" data-set="gw">Gameweek 34</button>
+          <button class="lb-tab" type="button" data-set="season">Season</button>
+        </div>
+        <input id="lbSearch" class="lb-search" type="search" placeholder="Search players" aria-label="Search players" />
+      </div>
+
+      <div class="podium" id="podium"><!-- top 3, injected by JS --></div>
+
       <div class="table-wrap">
         <table class="leaderboard">
           <thead>
-            <tr><th>#</th><th>Player</th><th>Exact</th><th class="num">Points</th></tr>
+            <tr>
+              <th>#</th>
+              <th data-sort="name" title="Sort by name">Player</th>
+              <th data-sort="exact" title="Sort by exact scores">Exact</th>
+              <th class="num" data-sort="pts" title="Sort by points">Points</th>
+            </tr>
           </thead>
           <tbody id="leaderboardBody"><!-- injected by JS --></tbody>
         </table>
