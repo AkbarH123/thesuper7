@@ -294,9 +294,9 @@
 
   function squadFor(f, side) {
     const teamName = side === "home" ? f.home : f.away;
-    // Prefer real squad data from the API.
+    // Prefer real squad data from the API (full squad list).
     if (f.squads && Array.isArray(f.squads[side]) && f.squads[side].length) {
-      return f.squads[side].slice(0, 10);
+      return f.squads[side];
     }
     // Fall back to our curated lists (Super 7 clubs + demo opponents).
     const code = codeFor(teamName);
@@ -318,22 +318,39 @@
     const specials = [OWN_GOAL, NO_SCORER];
     const known = squadFor(f, "home").concat(squadFor(f, "away")).concat(specials);
     const isCustom = !!pick.scorer && known.indexOf(pick.scorer) === -1;
+    const team = side === "home" ? f.home : f.away;
+
+    // Team toggle.
     let html = `<div class="side-tabs" role="tablist" aria-label="Pick a team">`;
     ["home", "away"].forEach((s) => {
-      const team = s === "home" ? f.home : f.away;
-      html += `<button type="button" class="side-tab${s === side ? " active" : ""}" data-tabside="${s}">${esc(abbr(team))} ${esc(team)}</button>`;
+      const t = s === "home" ? f.home : f.away;
+      html += `<button type="button" class="side-tab${s === side ? " active" : ""}" data-tabside="${s}">${esc(abbr(t))} ${esc(t)}</button>`;
     });
     html += `</div>`;
-    html += `<div class="scorer-chips" role="group" aria-label="First scorer">`;
+
+    // Dropdown with the selected team's full squad + other outcomes.
+    const selInSquad = pick.scorer && players.indexOf(pick.scorer) !== -1;
+    const selSpecial = pick.scorer === OWN_GOAL || pick.scorer === NO_SCORER;
+    const placeholderSel = !pick.scorer || (!selInSquad && !selSpecial && !isCustom);
+    html += `<select class="scorer-select" data-id="${esc(f.id)}" aria-label="First goalscorer">`;
+    html += `<option value=""${placeholderSel ? " selected" : ""} disabled hidden>Select a player&hellip;</option>`;
+    html += `<optgroup label="${esc(team)} squad">`;
     players.forEach((p) => {
-      html += `<button type="button" class="chip${pick.scorer === p ? " sel" : ""}" data-val="${esc(p)}">${esc(p)}</button>`;
+      html += `<option value="${esc(p)}"${pick.scorer === p ? " selected" : ""}>${esc(p)}</option>`;
     });
-    html += `</div>`;
-    html += `<div class="scorer-chips scorer-specials">`;
-    html += `<button type="button" class="chip chip-og${pick.scorer === OWN_GOAL ? " sel" : ""}" data-val="${esc(OWN_GOAL)}">Own goal</button>`;
-    html += `<button type="button" class="chip${pick.scorer === NO_SCORER ? " sel" : ""}" data-val="${esc(NO_SCORER)}">No goal</button>`;
-    html += `<button type="button" class="chip chip-other${isCustom ? " sel" : ""}" data-other="1">Other&hellip;</button>`;
-    html += `</div>`;
+    html += `</optgroup>`;
+    html += `<optgroup label="Other outcomes">`;
+    html += `<option value="${esc(OWN_GOAL)}"${pick.scorer === OWN_GOAL ? " selected" : ""}>Own goal</option>`;
+    html += `<option value="${esc(NO_SCORER)}"${pick.scorer === NO_SCORER ? " selected" : ""}>No goalscorer</option>`;
+    html += `<option value="__custom"${isCustom ? " selected" : ""}>Other (type a name)&hellip;</option>`;
+    html += `</optgroup>`;
+    html += `</select>`;
+
+    // Picked-from-the-other-team hint keeps the choice visible after toggling.
+    if (pick.scorer && !selInSquad && !selSpecial && !isCustom) {
+      html += `<p class="scorer-picked">Current pick: <strong>${esc(pick.scorer)}</strong> (other team)</p>`;
+    }
+
     html += `<input class="scorer-input" data-id="${esc(f.id)}" placeholder="Type a player from either team"
              value="${isCustom ? esc(pick.scorer) : ""}"${isCustom ? "" : " hidden"} />`;
     return `<div class="scorer-area" data-id="${esc(f.id)}">${html}</div>`;
@@ -490,7 +507,7 @@
     document.querySelectorAll("#fixtures .score-btn, #fixtures .chip, #fixtures .side-tab").forEach((b) => {
       b.disabled = locked;
     });
-    document.querySelectorAll("#fixtures .scorer-input").forEach((i) => { i.disabled = locked; });
+    document.querySelectorAll("#fixtures .scorer-input, #fixtures .scorer-select").forEach((i) => { i.disabled = locked; });
     const clearBtn = $("#clearBtn");
     if (clearBtn) clearBtn.hidden = locked;
     const submit = $("#submitBtn");
@@ -1045,24 +1062,27 @@
           if (f && area) area.outerHTML = scorerArea(f, slip[id] || {});
           return;
         }
-        const chip = e.target.closest(".chip");
-        if (chip) {
-          const el = e.target.closest(".fixture");
-          const id = el.dataset.id;
-          const input = el.querySelector(".scorer-input");
-          el.querySelectorAll(".chip").forEach((c) => c.classList.remove("sel"));
-          chip.classList.add("sel");
-          if (chip.dataset.other) {
-            // Reveal the free-text input for a custom player.
-            if (input) {
-              input.hidden = false;
-              input.focus();
-              setScorerValue(id, input.value.trim());
-            }
-          } else {
-            if (input) input.hidden = true;
-            setScorerValue(id, chip.dataset.val);
+      });
+      fixtures.addEventListener("change", (e) => {
+        if (isLocked()) return;
+        const sel = e.target.closest(".scorer-select");
+        if (!sel) return;
+        const el = e.target.closest(".fixture");
+        const input = el ? el.querySelector(".scorer-input") : null;
+        if (sel.value === "__custom") {
+          // Reveal the free-text input for a custom player.
+          if (input) {
+            input.hidden = false;
+            input.focus();
+            setScorerValue(sel.dataset.id, input.value.trim());
           }
+        } else {
+          if (input) { input.hidden = true; }
+          setScorerValue(sel.dataset.id, sel.value);
+          // Clear any stale "other team" hint by re-rendering this picker.
+          const f = FIXTURES.find((x) => String(x.id) === String(sel.dataset.id));
+          const area = el ? el.querySelector(".scorer-area") : null;
+          if (f && area) area.outerHTML = scorerArea(f, slip[sel.dataset.id] || {});
         }
       });
       fixtures.addEventListener("input", (e) => {
