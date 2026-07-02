@@ -30,15 +30,37 @@
     "tottenham": "TOT", "tottenham hotspur": "TOT", "spurs": "TOT",
   };
 
-  // First-scorer suggestions per club (datalist hints; free text still allowed).
+  // Fallback full squads for the Super 7 (used when the API can't provide
+  // squad data). Attackers first, then midfield, defence, goalkeepers.
   const SCORERS = {
-    ARS: ["Saka", "Havertz", "Martinelli", "Ødegaard", "Jesus", "Trossard"],
-    CHE: ["Palmer", "Jackson", "Nkunku", "Madueke", "Neto", "Sterling"],
-    LIV: ["Salah", "Núñez", "Gakpo", "Díaz", "Jota", "Szoboszlai"],
-    MCI: ["Haaland", "Foden", "Doku", "Savinho", "B. Silva", "Marmoush"],
-    MUN: ["Højlund", "Rashford", "Garnacho", "Fernandes", "Mount", "Zirkzee"],
-    NEW: ["Isak", "Gordon", "Wilson", "Barnes", "Murphy", "Joelinton"],
-    TOT: ["Son", "Solanke", "Richarlison", "Kulusevski", "Maddison", "Johnson"],
+    ARS: ["Saka", "Martinelli", "Trossard", "Jesus", "Havertz", "Sterling", "Nwaneri",
+          "Ødegaard", "Rice", "Partey", "Jorginho", "Merino",
+          "White", "Saliba", "Gabriel", "Calafiori", "Timber", "Kiwior", "Zinchenko", "Tomiyasu",
+          "Raya", "Neto"],
+    CHE: ["Palmer", "Jackson", "Nkunku", "Madueke", "Pedro Neto", "Mudryk", "Guiu",
+          "Enzo Fernández", "Caicedo", "Lavia", "Dewsbury-Hall", "Chukwuemeka",
+          "James", "Gusto", "Cucurella", "Colwill", "Fofana", "Badiashile", "Adarabioyo", "Chalobah",
+          "Sánchez", "Jörgensen"],
+    LIV: ["Salah", "Núñez", "Gakpo", "Díaz", "Jota", "Chiesa",
+          "Szoboszlai", "Mac Allister", "Gravenberch", "Jones", "Elliott", "Endo",
+          "Alexander-Arnold", "Robertson", "Tsimikas", "Van Dijk", "Konaté", "Gomez", "Quansah", "Bradley",
+          "Alisson", "Kelleher"],
+    MCI: ["Haaland", "Foden", "Doku", "Savinho", "Grealish", "Marmoush",
+          "B. Silva", "De Bruyne", "Kovačić", "Gündoğan", "McAtee", "Nico González",
+          "Lewis", "Aké", "Stones", "Dias", "Gvardiol", "Akanji", "Khusanov",
+          "Ederson", "Ortega"],
+    MUN: ["Højlund", "Zirkzee", "Rashford", "Garnacho", "Amad", "Antony",
+          "Fernandes", "Mount", "Eriksen", "Casemiro", "Mainoo", "Ugarte",
+          "Shaw", "Dalot", "Mazraoui", "Martínez", "De Ligt", "Maguire", "Yoro", "Evans",
+          "Onana", "Bayindir"],
+    NEW: ["Isak", "Gordon", "Barnes", "Wilson", "Murphy", "Osula",
+          "Joelinton", "Bruno Guimarães", "Tonali", "Longstaff", "Willock", "Miley",
+          "Trippier", "Livramento", "Hall", "Burn", "Schär", "Botman", "Lascelles", "Krafth",
+          "Pope", "Dúbravka"],
+    TOT: ["Son", "Solanke", "Richarlison", "Johnson", "Odobert", "Moore",
+          "Maddison", "Kulusevski", "Sarr", "Bissouma", "Bentancur", "Bergvall", "Gray",
+          "Porro", "Udogie", "Spence", "Romero", "Van de Ven", "Davies", "Dragusin",
+          "Vicario", "Forster"],
   };
 
   // Fallback fixtures (used when /api/fixtures is unavailable, e.g. opened locally).
@@ -131,15 +153,36 @@
   const OWN_GOAL = "Own goal";
   const ENTRY_CUTOFF_MS = 3600000; // entries close 1 hour before first kickoff
 
-  // Demo squad lists for opponents (used when the API can't provide squads).
+  // Fallback full squads for opponents (used when the API can't provide squads).
   const FALLBACK_SQUADS = {
-    "aston villa":     ["Watkins", "Rogers", "Bailey", "Tielemans", "McGinn", "Ramsey"],
-    "brighton":        ["João Pedro", "Mitoma", "Welbeck", "Adingra", "Rutter", "O'Riley"],
-    "everton":         ["Calvert-Lewin", "Ndiaye", "McNeil", "Doucouré", "Beto", "Harrison"],
-    "wolves":          ["Cunha", "Strand Larsen", "Hwang", "Sarabia", "Bellegarde", "Aït-Nouri"],
-    "fulham":          ["Jiménez", "Iwobi", "Muniz", "Wilson", "Smith Rowe", "Traoré"],
-    "brentford":       ["Mbeumo", "Wissa", "Schade", "Damsgaard", "Lewis-Potter", "Janelt"],
-    "crystal palace":  ["Mateta", "Eze", "Sarr", "Kamada", "Muñoz", "Hughes"],
+    "aston villa":     ["Watkins", "Durán", "Rogers", "Bailey", "Philogene", "Ramsey",
+                        "McGinn", "Tielemans", "Onana", "Kamara", "Barkley", "Buendía",
+                        "Digne", "Maatsen", "Cash", "Konsa", "Torres", "Mings", "Carlos", "Bogarde",
+                        "E. Martínez", "Olsen"],
+    "brighton":        ["João Pedro", "Welbeck", "Mitoma", "Adingra", "Rutter", "Minteh", "Gruda",
+                        "O'Riley", "Baleba", "Ayari", "Hinshelwood", "Wieffer", "March",
+                        "Estupiñán", "Kadıoğlu", "Lamptey", "Dunk", "Van Hecke", "Webster", "Veltman", "Igor",
+                        "Verbruggen", "Steele"],
+    "everton":         ["Calvert-Lewin", "Beto", "McNeil", "Ndiaye", "Harrison", "Lindstrøm", "Chermiti",
+                        "Doucouré", "Gueye", "Garner", "Iroegbunam", "Mangala", "Young",
+                        "Mykolenko", "Patterson", "Coleman", "Tarkowski", "Branthwaite", "Keane", "O'Brien",
+                        "Pickford", "Begović"],
+    "wolves":          ["Cunha", "Strand Larsen", "Hwang", "Guedes", "Sarabia", "Munetsi",
+                        "Bellegarde", "Lemina", "João Gomes", "André", "Doherty",
+                        "Aït-Nouri", "Semedo", "Toti", "Dawson", "Bueno", "Mosquera", "Agbadou",
+                        "Sá", "Johnstone"],
+    "fulham":          ["Jiménez", "Muniz", "Iwobi", "Wilson", "Smith Rowe", "Traoré", "Nelson",
+                        "Pereira", "Lukić", "Berge", "Cairney", "King",
+                        "Robinson", "Sessegnon", "Castagne", "Tete", "Bassey", "Andersen", "Diop", "Cuenca",
+                        "Leno", "Benda"],
+    "brentford":       ["Mbeumo", "Wissa", "Schade", "Lewis-Potter", "Maghoma", "Carvalho",
+                        "Damsgaard", "Janelt", "Nørgaard", "Onyeka", "Jensen", "Yarmoliuk",
+                        "Henry", "Lewis", "Ajer", "Collins", "Pinnock", "Van den Berg", "Mee", "Roerslev",
+                        "Flekken", "Valdimarsson"],
+    "crystal palace":  ["Mateta", "Eze", "Sarr", "Nketiah", "Kamada", "Devenny",
+                        "Hughes", "Wharton", "Lerma", "Doucouré",
+                        "Muñoz", "Mitchell", "Clyne", "Ward", "Guéhi", "Lacroix", "Richards",
+                        "Henderson", "Turner"],
   };
 
   // Season-long demo standings for the leaderboard's second tab.

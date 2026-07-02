@@ -43,7 +43,7 @@ async function squadFor(teamId) {
       .filter((p) => p && p.strPlayer)
       .sort((a, b) => rank(a) - rank(b))
       .map((p) => p.strPlayer)
-      .slice(0, 24);
+      .slice(0, 25);
   } catch (e) {
     return null; // squad data is best-effort; the client has fallbacks
   }
