@@ -324,7 +324,7 @@
     let html = `<div class="side-tabs" role="tablist" aria-label="Pick a team">`;
     ["home", "away"].forEach((s) => {
       const t = s === "home" ? f.home : f.away;
-      html += `<button type="button" class="side-tab${s === side ? " active" : ""}" data-tabside="${s}">${esc(abbr(t))} ${esc(t)}</button>`;
+      html += `<button type="button" class="side-tab${s === side ? " active" : ""}" data-tabside="${s}">${esc(t)}</button>`;
     });
     html += `</div>`;
 
